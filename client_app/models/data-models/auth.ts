@@ -24,6 +24,7 @@ export type UserProfile = {
 };
 
 export type AuthResponse = {
-  token: string;
+  access: string;
+  refresh: string;
   user: UserProfile;
 };

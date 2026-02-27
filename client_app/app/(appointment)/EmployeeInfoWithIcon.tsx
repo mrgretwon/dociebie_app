@@ -17,7 +17,7 @@ const EmployeeInfoWithIcon = ({ employee, style }: EmployeeInfoProps) => {
     <View style={[styles.container, style]}>
       <Image style={styles.image} contentFit="cover" source={portrait as any} />
       <Text style={styles.nameText}>
-        {employee.name} {employee.surname}
+        {employee.name}
       </Text>
     </View>
   );

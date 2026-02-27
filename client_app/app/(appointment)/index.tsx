@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import Button from "@/components/Button";
-import { sampleEmployees } from "@/constants/dummy-data";
 import { darkGreyFont, greyedOutFont, greyFont, smallFontSize } from "@/constants/style-vars";
 import { useTranslations } from "@/hooks/use-translations";
 import SalonEmployeeModel from "@/models/data-models/salonEmployeeModel";
+import { fetchSalon } from "@/services/api";
 import { AntDesign } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppointmentDateTimePicker from "./AppointmentDateTimePicker";
 import BookingConfirmationModal from "./BookingConfirmationModal";
@@ -16,10 +16,19 @@ import EmployeeDropdown from "./EmployeeDropdown";
 export default function UserDataScreen() {
   const translate = useTranslations();
   const router = useRouter();
+  const { salonId } = useLocalSearchParams<{ salonId?: string }>();
 
   const [selectedEmployee, setSelectedEmployee] = useState<SalonEmployeeModel | null>(null);
-  const [employeeList, setEmployeeList] = useState(sampleEmployees);
+  const [employeeList, setEmployeeList] = useState<SalonEmployeeModel[]>([]);
   const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
+
+  useEffect(() => {
+    if (salonId) {
+      fetchSalon(+salonId)
+        .then((salon) => setEmployeeList(salon.employees))
+        .catch((err) => console.warn("Failed to fetch salon employees:", err));
+    }
+  }, [salonId]);
 
   const handleConfirmationModalPay = () => {
     setIsConfirmationModalVisible(false);

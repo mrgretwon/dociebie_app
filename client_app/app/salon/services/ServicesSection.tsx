@@ -1,21 +1,37 @@
-import { sampleServices } from "@/constants/dummy-data";
+import Spinner from "@/components/Spinner";
 import { greyedOutFont, smallerFontSize } from "@/constants/style-vars";
 import { ServiceModel } from "@/models/data-models/serviceModel";
 import ColumnFilter from "@/models/enums/columnFilter";
+import { fetchSalonServices } from "@/services/api";
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import ServiceComponent from "./ServiceComponent";
 
-const ServicesSection = () => {
+interface ServicesSectionProps {
+  salonId: number;
+}
+
+const ServicesSection = ({ salonId }: ServicesSectionProps) => {
   const router = useRouter();
 
   const [priceFilter, setPriceFilter] = useState(ColumnFilter.Default);
-  const [services] = useState<ServiceModel[]>(sampleServices);
-  const [filteredServices, setFilteredServices] = useState(sampleServices);
+  const [services, setServices] = useState<ServiceModel[] | null>(null);
+  const [filteredServices, setFilteredServices] = useState<ServiceModel[]>([]);
 
   useEffect(() => {
+    fetchSalonServices(salonId)
+      .then((data) => {
+        setServices(data);
+        setFilteredServices(data);
+      })
+      .catch((err) => console.warn("Failed to fetch services:", err));
+  }, [salonId]);
+
+  useEffect(() => {
+    if (!services) return;
+
     switch (priceFilter) {
       case ColumnFilter.Ascending:
         setFilteredServices([...services].sort((s1, s2) => s1.price - s2.price));
@@ -26,7 +42,7 @@ const ServicesSection = () => {
       default:
         setFilteredServices(services);
     }
-  }, [priceFilter, setFilteredServices, services]);
+  }, [priceFilter, services]);
 
   const handleFilterPricePressed = useCallback(
     (filterStatus: ColumnFilter): void => {
@@ -40,6 +56,10 @@ const ServicesSection = () => {
     },
     [setPriceFilter]
   );
+
+  if (services === null) {
+    return <Spinner />;
+  }
 
   return (
     <View style={styles.container}>

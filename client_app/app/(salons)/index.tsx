@@ -4,7 +4,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import SalonList from "@/components/SalonList";
 import Spinner from "@/components/Spinner";
-import { sampleSalons } from "@/constants/dummy-data";
 import { baseGrey } from "@/constants/style-vars";
 import { useSalonsSearch } from "@/contexts/SalonsSearchContext";
 import { SalonModel } from "@/models/data-models/salonModel";
@@ -51,7 +50,7 @@ export default function SalonsScreen() {
           <SalonsSearchFilter />
 
           <View style={styles.contentWrapper}>
-            <SalonList salons={sampleSalons} onClick={(salon) => handleSalonClicked(salon)} />
+            <SalonList salons={salons} onClick={(salon) => handleSalonClicked(salon)} />
           </View>
         </ScrollView>
       </View>

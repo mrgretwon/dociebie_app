@@ -42,7 +42,7 @@ const SalonServicesScreen = () => {
         />
 
         <View style={styles.servicesWrapper}>
-          <ServicesSection />
+          <ServicesSection salonId={+salonId} />
         </View>
       </ScrollView>
     </View>

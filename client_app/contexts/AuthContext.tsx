@@ -4,9 +4,14 @@ import {
   RegisterPayload,
   UserProfile,
 } from "@/models/data-models/auth";
-import { fetchProfile, loginRequest, registerRequest } from "@/services/api";
+import {
+  fetchProfile,
+  loginRequest,
+  registerRequest,
+  refreshToken as refreshTokenRequest,
+} from "@/services/api";
 import * as SecureStore from "expo-secure-store";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 type AuthOptions = {
   persist?: boolean;
@@ -23,7 +28,8 @@ type AuthContextValue = {
   logout: () => Promise<void>;
 };
 
-const TOKEN_STORAGE_KEY = "do-ciebie-auth-token";
+const ACCESS_TOKEN_KEY = "do-ciebie-access-token";
+const REFRESH_TOKEN_KEY = "do-ciebie-refresh-token";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -33,16 +39,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isHydrating, setIsHydrating] = useState(true);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
-  const applyAuthResponse = useCallback(async (auth: AuthResponse, persistToken = true) => {
-    setToken(auth.token);
-    setUser(auth.user);
+  // Keep a ref so async callbacks always see latest refresh token
+  const refreshTokenRef = useRef<string | null>(null);
 
-    if (persistToken) {
-      await SecureStore.setItemAsync(TOKEN_STORAGE_KEY, auth.token);
-    } else {
-      await SecureStore.deleteItemAsync(TOKEN_STORAGE_KEY);
-    }
+  const clearAuth = useCallback(async () => {
+    setToken(null);
+    setUser(null);
+    refreshTokenRef.current = null;
+    await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+    await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
   }, []);
+
+  const applyAuthResponse = useCallback(
+    async (auth: AuthResponse, persistTokens = true) => {
+      setToken(auth.access);
+      setUser(auth.user);
+      refreshTokenRef.current = auth.refresh;
+
+      if (persistTokens) {
+        await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, auth.access);
+        await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, auth.refresh);
+      } else {
+        await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+        await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+      }
+    },
+    []
+  );
+
+  const tryRefreshToken = useCallback(async (): Promise<string | null> => {
+    const storedRefresh =
+      refreshTokenRef.current ?? (await SecureStore.getItemAsync(REFRESH_TOKEN_KEY));
+
+    if (!storedRefresh) return null;
+
+    try {
+      const { access } = await refreshTokenRequest(storedRefresh);
+      setToken(access);
+      refreshTokenRef.current = storedRefresh;
+      await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, access);
+      return access;
+    } catch {
+      await clearAuth();
+      return null;
+    }
+  }, [clearAuth]);
 
   const login = useCallback(
     async (credentials: LoginPayload, options?: AuthOptions) => {
@@ -79,45 +120,71 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const profile = await fetchProfile(token);
       setUser(profile);
-    } catch (error) {
-      setToken(null);
-      setUser(null);
-      await SecureStore.deleteItemAsync(TOKEN_STORAGE_KEY);
-      throw error;
+    } catch {
+      // Access token may have expired — try refreshing
+      const newToken = await tryRefreshToken();
+      if (newToken) {
+        try {
+          const profile = await fetchProfile(newToken);
+          setUser(profile);
+          return;
+        } catch {
+          // refresh succeeded but profile still fails
+        }
+      }
+      await clearAuth();
     }
-  }, [token]);
+  }, [token, tryRefreshToken, clearAuth]);
 
   const logout = useCallback(async () => {
-    setToken(null);
-    setUser(null);
-    await SecureStore.deleteItemAsync(TOKEN_STORAGE_KEY);
-  }, []);
+    await clearAuth();
+  }, [clearAuth]);
 
+  // Hydrate from storage on mount
   useEffect(() => {
     const hydrateFromStorage = async () => {
       try {
-        const storedToken = await SecureStore.getItemAsync(TOKEN_STORAGE_KEY);
+        const storedRefresh = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
 
-        if (!storedToken) {
-          setToken(null);
-          setUser(null);
+        if (!storedRefresh) {
+          // No refresh token — clean start
+          await clearAuth();
           return;
         }
 
-        const profile = await fetchProfile(storedToken);
-        setToken(storedToken);
-        setUser(profile);
+        refreshTokenRef.current = storedRefresh;
+
+        // Try stored access token first
+        const storedAccess = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+
+        if (storedAccess) {
+          try {
+            const profile = await fetchProfile(storedAccess);
+            setToken(storedAccess);
+            setUser(profile);
+            return;
+          } catch {
+            // Access token expired, will try refresh below
+          }
+        }
+
+        // Access token missing or expired — try refresh
+        const newAccess = await tryRefreshToken();
+        if (newAccess) {
+          const profile = await fetchProfile(newAccess);
+          setUser(profile);
+        } else {
+          await clearAuth();
+        }
       } catch {
-        await SecureStore.deleteItemAsync(TOKEN_STORAGE_KEY);
-        setToken(null);
-        setUser(null);
+        await clearAuth();
       } finally {
         setIsHydrating(false);
       }
     };
 
     hydrateFromStorage();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const value = useMemo(
     () => ({
