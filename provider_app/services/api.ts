@@ -129,6 +129,7 @@ export async function registerRequest(payload: RegisterPayload): Promise<AuthRes
       street,
       city,
       postal_code: postalCode,
+      role: "provider",
     }),
   });
 

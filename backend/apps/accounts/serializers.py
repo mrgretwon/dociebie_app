@@ -14,10 +14,13 @@ class UserSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
+    role = serializers.ChoiceField(
+        choices=User.Role.choices, default=User.Role.CLIENT, required=False
+    )
 
     class Meta:
         model = User
-        fields = ("email", "password", "name", "surname", "street", "city", "postal_code")
+        fields = ("email", "password", "name", "surname", "street", "city", "postal_code", "role")
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
