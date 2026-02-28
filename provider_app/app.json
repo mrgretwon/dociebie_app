@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "do-ciebie-provider",
+    "name": "DoCiebie Biznes",
     "slug": "do-ciebie-provider",
-    "version": "1.0.0",
+    "version": "0.0.7",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "dociebiprovider",
@@ -32,7 +32,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 120,
+          "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#002B8A",
           "dark": {

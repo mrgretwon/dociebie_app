@@ -1,3 +1,4 @@
+import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
@@ -23,6 +24,7 @@ import { Toast } from "toastify-react-native";
 
 export default function CreateGroupScreen() {
   const router = useRouter();
+  const goBack = useSafeBack();
   const { token } = useAuth();
 
   const [groupName, setGroupName] = useState("");
@@ -38,7 +40,7 @@ export default function CreateGroupScreen() {
     try {
       await createProviderClientGroup({ name: groupName }, token);
       Toast.success("Grupa została utworzona");
-      router.back();
+      goBack();
     } catch {
       Toast.error("Nie udało się utworzyć grupy");
     } finally {
@@ -106,7 +108,7 @@ export default function CreateGroupScreen() {
           />
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={() => goBack()}
           >
             <Text style={styles.backButtonText}>Wróć</Text>
           </TouchableOpacity>

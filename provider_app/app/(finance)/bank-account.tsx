@@ -1,3 +1,4 @@
+import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useEffect, useState } from "react";
 import {
   ScrollView,
@@ -28,6 +29,7 @@ import { Toast } from "toastify-react-native";
 
 export default function BankAccountScreen() {
   const router = useRouter();
+  const goBack = useSafeBack();
   const { token } = useAuth();
   const { tab } = useLocalSearchParams<{ tab?: string }>();
   const isAssignMode = tab === "assign";
@@ -82,7 +84,7 @@ export default function BankAccountScreen() {
         token
       );
       Toast.success("Dane rachunku zostały zapisane");
-      router.back();
+      goBack();
     } catch {
       Toast.error("Nie udało się zapisać danych rachunku");
     } finally {
@@ -135,13 +137,13 @@ export default function BankAccountScreen() {
           <View style={styles.bottomButtons}>
             <Button
               text="Zapisz"
-              onClick={() => router.back()}
+              onClick={() => goBack()}
               style={styles.saveButton}
               textStyle={styles.saveButtonText}
             />
             <TouchableOpacity
               style={styles.backButton}
-              onPress={() => router.back()}
+              onPress={() => goBack()}
             >
               <Text style={styles.backButtonText}>Wróć</Text>
             </TouchableOpacity>
@@ -204,7 +206,7 @@ export default function BankAccountScreen() {
           />
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={() => goBack()}
           >
             <Text style={styles.backButtonText}>Wróć</Text>
           </TouchableOpacity>

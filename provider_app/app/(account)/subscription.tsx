@@ -1,3 +1,4 @@
+import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
@@ -21,6 +22,7 @@ import { Toast } from "toastify-react-native";
 
 export default function SubscriptionScreen() {
   const router = useRouter();
+  const goBack = useSafeBack();
   const { token } = useAuth();
   const [loading, setLoading] = useState(true);
   const [isActive, setIsActive] = useState(false);
@@ -89,7 +91,7 @@ export default function SubscriptionScreen() {
 
             <TouchableOpacity
               style={styles.outlineButton}
-              onPress={() => router.back()}
+              onPress={() => goBack()}
             >
               <Text style={styles.outlineButtonText}>Wróć</Text>
             </TouchableOpacity>

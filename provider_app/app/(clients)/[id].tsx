@@ -1,3 +1,4 @@
+import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useEffect, useState } from "react";
 import {
   ScrollView,
@@ -37,6 +38,7 @@ type Visit = {
 export default function ClientDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const goBack = useSafeBack();
   const { token } = useAuth();
   const [loading, setLoading] = useState(true);
   const [client, setClient] = useState<{ name: string; surname: string; email: string } | null>(null);
@@ -177,7 +179,7 @@ export default function ClientDetailScreen() {
         <View style={styles.bottomButtons}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={() => goBack()}
           >
             <Text style={styles.backButtonText}>Wróć</Text>
           </TouchableOpacity>

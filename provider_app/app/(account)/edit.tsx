@@ -1,3 +1,4 @@
+import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
@@ -23,6 +24,7 @@ import { Toast } from "toastify-react-native";
 
 export default function EditAccountScreen() {
   const router = useRouter();
+  const goBack = useSafeBack();
   const { user, token } = useAuth();
 
   const [firstName, setFirstName] = useState(user?.name ?? "");
@@ -46,7 +48,7 @@ export default function EditAccountScreen() {
       if (password && password !== "********") data.newPassword = password;
 
       await updateUserProfileData(data, token);
-      router.back();
+      goBack();
     } catch {
       Toast.error("Zapis danych nie powiódł się");
     } finally {

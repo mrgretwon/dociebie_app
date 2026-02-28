@@ -1,3 +1,4 @@
+import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useEffect, useState } from "react";
 import {
   ScrollView,
@@ -36,6 +37,7 @@ type ClientGroup = {
 
 export default function ClientGroupsScreen() {
   const router = useRouter();
+  const goBack = useSafeBack();
   const { token } = useAuth();
   const [groups, setGroups] = useState<ClientGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -117,7 +119,7 @@ export default function ClientGroupsScreen() {
           />
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={() => goBack()}
           >
             <Text style={styles.backButtonText}>Wróć</Text>
           </TouchableOpacity>

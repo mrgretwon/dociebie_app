@@ -1,3 +1,4 @@
+import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -22,6 +23,7 @@ import { Toast } from "toastify-react-native";
 
 export default function AddClientScreen() {
   const router = useRouter();
+  const goBack = useSafeBack();
   const { token } = useAuth();
   const { short } = useLocalSearchParams<{ short?: string }>();
   const isShortForm = short === "1";
@@ -46,7 +48,7 @@ export default function AddClientScreen() {
         token
       );
       Toast.success("Klient został dodany");
-      router.back();
+      goBack();
     } catch {
       Toast.error("Nie udało się dodać klienta");
     } finally {
@@ -130,7 +132,7 @@ export default function AddClientScreen() {
           />
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={() => goBack()}
           >
             <Text style={styles.backButtonText}>Wróć</Text>
           </TouchableOpacity>

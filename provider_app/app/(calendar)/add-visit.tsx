@@ -1,3 +1,4 @@
+import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useEffect, useState } from "react";
 import {
   ScrollView,
@@ -40,6 +41,7 @@ type SlotItem = { start_time: string; end_time: string; available: boolean };
 
 export default function AddVisitScreen() {
   const router = useRouter();
+  const goBack = useSafeBack();
   const { date: dateParam } = useLocalSearchParams<{ date?: string }>();
   const { token } = useAuth();
 
@@ -159,7 +161,7 @@ export default function AddVisitScreen() {
         token
       );
       Toast.success("Wizyta została dodana");
-      router.back();
+      goBack();
     } catch {
       Toast.error("Nie udało się dodać wizyty");
     } finally {
@@ -410,7 +412,7 @@ export default function AddVisitScreen() {
           />
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={() => goBack()}
           >
             <Text style={styles.backButtonText}>Wróć</Text>
           </TouchableOpacity>

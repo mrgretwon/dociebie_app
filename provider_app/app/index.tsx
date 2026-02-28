@@ -1,8 +1,9 @@
-import logoWhite from "@/assets/images/logo-dociebie_white_new.png";
+import splashLogo from "@/assets/images/splash-icon.png";
 import { primaryColor } from "@/constants/style-vars";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRouter } from "expo-router";
-import { useEffect } from "react";
+import { Redirect, useNavigation } from "expo-router";
+import { CommonActions } from "@react-navigation/native";
+import { useEffect, useRef } from "react";
 import { Image, StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -11,23 +12,34 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
+let hasLaunched = false;
+
 export default function SplashScreen() {
-  const router = useRouter();
+  const navigation = useNavigation();
   const { token, isHydrating } = useAuth();
   const opacity = useSharedValue(1);
 
+  // If user somehow navigates back here after the initial launch, redirect immediately
+  if (hasLaunched) {
+    return <Redirect href={token ? "/(dashboard)" : "/(auth)/login"} />;
+  }
+
   useEffect(() => {
     if (isHydrating) return;
+
+    hasLaunched = true;
 
     // Start fading out after 0.5s, fade takes 1s → total 1.5s
     opacity.value = withDelay(500, withTiming(0, { duration: 1000 }));
 
     const timeout = setTimeout(() => {
-      if (token) {
-        router.replace("/(dashboard)");
-      } else {
-        router.replace("/(auth)/login");
-      }
+      const target = token ? "(dashboard)" : "(auth)";
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: target }],
+        })
+      );
     }, 1500);
 
     return () => clearTimeout(timeout);
@@ -41,7 +53,7 @@ export default function SplashScreen() {
     <View style={styles.container}>
       <Animated.View style={animatedStyle}>
         <Image
-          source={logoWhite}
+          source={splashLogo}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -58,7 +70,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   logo: {
-    width: 360,
-    aspectRatio: 1582 / 310,
+    width: 180,
+    maxWidth: "90%",
+    alignSelf: "center",
+    aspectRatio: 1190 / 1246,
   },
 });

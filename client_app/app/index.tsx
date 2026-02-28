@@ -1,5 +1,4 @@
-import logoWhite from "@/assets/images/logo-dociebie_white_new.png";
-import { primaryColor } from "@/constants/style-vars";
+import splashLogo from "@/assets/images/splash-icon.png";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { Image, StyleSheet, View } from "react-native";
@@ -33,7 +32,7 @@ export default function SplashScreen() {
     <View style={styles.container}>
       <Animated.View style={animatedStyle}>
         <Image
-          source={logoWhite}
+          source={splashLogo}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -45,12 +44,14 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: primaryColor,
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
   },
   logo: {
-    width: 360,
-    aspectRatio: 1582 / 310,
+    width: 200,
+    maxWidth: "90%",
+    alignSelf: "center",
+    aspectRatio: 1190 / 1246,
   },
 });

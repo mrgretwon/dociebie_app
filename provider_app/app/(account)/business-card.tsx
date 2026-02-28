@@ -1,3 +1,4 @@
+import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useEffect, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
@@ -33,6 +34,7 @@ import { Toast } from "toastify-react-native";
 
 export default function BusinessCardScreen() {
   const router = useRouter();
+  const goBack = useSafeBack();
   const { token } = useAuth();
 
   const [loading, setLoading] = useState(true);
@@ -119,7 +121,7 @@ export default function BusinessCardScreen() {
         ),
       ]);
       Toast.success("Wizytówka została zapisana");
-      router.back();
+      goBack();
     } catch {
       Toast.error("Nie udało się zapisać wizytówki");
     } finally {
@@ -357,7 +359,7 @@ export default function BusinessCardScreen() {
 
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={() => goBack()}
           >
             <Text style={styles.backButtonText}>Wróć</Text>
           </TouchableOpacity>

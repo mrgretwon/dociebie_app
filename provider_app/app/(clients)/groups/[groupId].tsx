@@ -1,3 +1,4 @@
+import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useEffect, useState } from "react";
 import {
   ScrollView,
@@ -43,6 +44,7 @@ type Member = {
 export default function GroupDetailScreen() {
   const { groupId } = useLocalSearchParams<{ groupId: string }>();
   const router = useRouter();
+  const goBack = useSafeBack();
   const { token } = useAuth();
 
   const [loading, setLoading] = useState(true);
@@ -112,7 +114,7 @@ export default function GroupDetailScreen() {
     try {
       await deleteProviderClientGroup(gid, token);
       Toast.success("Grupa została usunięta");
-      router.back();
+      goBack();
     } catch {
       Toast.error("Nie udało się usunąć grupy");
     }
@@ -233,7 +235,7 @@ export default function GroupDetailScreen() {
               if (showAddForm) {
                 setShowAddForm(false);
               } else {
-                router.back();
+                goBack();
               }
             }}
           >

@@ -538,12 +538,14 @@ class Command(BaseCommand):
 
         if not Appointment.objects.filter(user=client_user).exists() and employees and services:
             svc = services[0]
+            now = timezone.now()
+            # Appointments relative to today so they always show in the calendar
             Appointment.objects.create(
                 user=client_user,
                 salon=salon,
                 service=svc,
                 employee=employees[0],
-                date=timezone.make_aware(datetime(2025, 3, 1, 15, 30)),
+                date=now.replace(hour=15, minute=30) + timezone.timedelta(days=1),
                 status="paid",
             )
             Appointment.objects.create(
@@ -551,16 +553,24 @@ class Command(BaseCommand):
                 salon=salon,
                 service=svc,
                 employee=employees[1 % len(employees)],
-                date=timezone.make_aware(datetime(2025, 3, 3, 8, 30)),
-                status="unpaid",
+                date=now.replace(hour=8, minute=30) + timezone.timedelta(days=3),
+                status="confirmed",
             )
             Appointment.objects.create(
                 user=client_user,
                 salon=salon,
                 service=svc,
                 employee=employees[2 % len(employees)],
-                date=timezone.make_aware(datetime(2025, 2, 15, 12, 30)),
+                date=now.replace(hour=12, minute=30) - timezone.timedelta(days=3),
                 status="completed",
+            )
+            Appointment.objects.create(
+                user=client_user,
+                salon=salon,
+                service=svc,
+                employee=employees[0],
+                date=now.replace(hour=10, minute=0) + timezone.timedelta(days=5),
+                status="pending",
             )
 
         # --- Subscription data for some salons ---

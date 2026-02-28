@@ -87,9 +87,8 @@ No test framework is configured in any project.
 
 ### Demo Credentials (after seed_data)
 - Client: `demo@dociebie.pl` / `demo123`
-- Provider: `provider@example.com` / `provider123`
-- Provider 2: `provider2@example.com` / `provider123`
-- Admin: `admin@example.com` / `admin123`
+- Providers: `owner1@dociebie.pl` through `owner10@dociebie.pl` / `provider123`
+- Admin: configured via `DJANGO_SUPERUSER_EMAIL` env var (default `admin@example.com`) / `admin123`
 
 ## Project Structure
 
@@ -97,9 +96,9 @@ No test framework is configured in any project.
 - `config/` — Django project settings (`settings.py`, `urls.py`, `wsgi.py`). Settings use `django-environ` to read from `backend/.env`.
 - `apps/accounts/` — Custom `User` model (email-based auth, role field: client/provider), `EmailBackend`, JWT auth views (register, login, profile), serializers.
 - `apps/salons/` — Models: `Category`, `Salon` (FK to provider User), `OpeningHours`, `Employee`, `Service`, `Review`. Salon `rating` is auto-calculated from reviews. Services are per-salon.
-- `apps/appointments/` — `Appointment` model with status choices (paid/unpaid/completed/cancelled). Links user, salon, service, employee.
+- `apps/appointments/` — `Appointment` model with status choices (pending/confirmed/paid/unpaid/completed/cancelled). Links user, salon, service, employee.
 - `apps/provider/` — Provider-only API views. Uses `ProviderSalonMixin` to auto-resolve the authenticated provider's salon. Endpoints for managing salon details, services, employees, appointments, bank account, opening hours, reports, and available slots.
-- `apps/salons/management/commands/seed_data.py` — Populates DB with 10 salons (diverse categories/cities), employees, services, reviews, and demo appointments.
+- `apps/salons/management/commands/seed_data.py` — Populates DB with 10 salons (diverse categories/cities), employees, services, reviews, and demo appointments. Appointments use relative dates (based on `timezone.now()`) so they always appear near the current date.
 - `apps/salons/management/commands/seed_images.py` — Downloads random placeholder images from picsum.photos for salons (2 per salon: 1 main + 1 shared for services/reviews/details) and employees (1 each).
 - `.env.example` — Template for environment variables.
 - `Dockerfile` — Python 3.12-slim, installs requirements, runs gunicorn.
@@ -168,4 +167,7 @@ All under `/api/`:
 - **Static files**: whitenoise middleware serves static files (category icons, admin assets) directly from gunicorn. Media files served by Django in DEBUG mode; in production, user's nginx serves `/media/`.
 - **Environment config**: Backend uses `backend/.env` (gitignored). Copy `backend/.env.example` to get started. Mobile auto-detects via `__DEV__` — Android emulator uses Expo dev server host IP on port 8000, iOS/web uses `localhost:8000`, production uses `dociebie.pl`.
 - **Provider app**: Separate Expo app for salon owners. Drawer-based navigation (not tabs). Uses `ProviderSalonMixin` backend pattern — all provider endpoints auto-resolve the salon from the authenticated user's ownership. Services and employees support full CRUD with image upload via multipart PATCH. Available slots are calculated server-side based on opening hours, service duration, and existing appointments.
+- **Splash screen pattern**: Both apps use a splash screen at `app/index.tsx` with a fade-out animation. A module-level `hasLaunched` flag prevents re-displaying the splash when navigating back — after first launch, any return to index instantly redirects via `<Redirect>`. Navigation uses `CommonActions.reset()` to clear the stack.
+- **Safe back navigation**: Provider app uses `useSafeBack` hook (`hooks/use-safe-back.ts`) which checks `navigation.canGoBack()` before calling `router.back()`, falling back to `/(dashboard)` if there's no history. Used in `GoBackButton` and all screens with back navigation.
+- **Screen animations**: Both apps use `slide_from_right` animation with 250ms duration for all Stack navigators. Configured in `screenOptions` of each `_layout.tsx`.
 - **Polish diacritics**: All UI strings in both apps must use proper Polish characters (ą, ć, ę, ł, ń, ó, ś, ź, ż). Provider app strings are hardcoded (not using i18n keys). Always check for missing diacritics when adding new Polish text.

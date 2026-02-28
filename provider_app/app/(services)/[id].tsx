@@ -1,3 +1,4 @@
+import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -31,6 +32,7 @@ import { Toast } from "toastify-react-native";
 export default function EditServiceScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const goBack = useSafeBack();
   const { token } = useAuth();
   const isNew = id === "new";
 
@@ -86,7 +88,7 @@ export default function EditServiceScreen() {
         );
         Toast.success("Usługa została zaktualizowana");
       }
-      router.back();
+      goBack();
     } catch {
       Toast.error("Nie udało się zapisać usługi");
     } finally {
@@ -99,7 +101,7 @@ export default function EditServiceScreen() {
     try {
       await deleteProviderService(Number(id), token);
       Toast.success("Usługa została usunięta");
-      router.back();
+      goBack();
     } catch {
       Toast.error("Nie udało się usunąć usługi");
     }
@@ -202,7 +204,7 @@ export default function EditServiceScreen() {
           )}
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={() => goBack()}
           >
             <Text style={styles.backButtonText}>Wróć</Text>
           </TouchableOpacity>

@@ -1,3 +1,4 @@
+import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useState } from "react";
 import {
   Alert,
@@ -28,6 +29,7 @@ import { Toast } from "toastify-react-native";
 
 export default function ReportsScreen() {
   const router = useRouter();
+  const goBack = useSafeBack();
   const { token } = useAuth();
   const [generating, setGenerating] = useState(false);
   const [report, setReport] = useState<Record<string, unknown> | null>(null);
@@ -129,7 +131,7 @@ export default function ReportsScreen() {
           />
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={() => goBack()}
           >
             <Text style={styles.backButtonText}>Wróć</Text>
           </TouchableOpacity>

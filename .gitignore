@@ -1,0 +1,4 @@
+backend.tar
+.idea
+media_backup
+db_dump.sql

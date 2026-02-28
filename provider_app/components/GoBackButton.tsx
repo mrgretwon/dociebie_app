@@ -1,15 +1,15 @@
 import { greyFont, primaryColor } from "@/constants/style-vars";
+import { useSafeBack } from "@/hooks/use-safe-back";
 import { useTranslations } from "@/hooks/use-translations";
-import { useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const GoBackButton = () => {
   const translate = useTranslations();
-  const router = useRouter();
+  const goBack = useSafeBack();
 
   return (
     <View>
-      <TouchableOpacity onPress={() => router.back()}>
+      <TouchableOpacity onPress={goBack}>
         <Text style={styles.goBackButton}>{translate("BACK")}</Text>
       </TouchableOpacity>
     </View>

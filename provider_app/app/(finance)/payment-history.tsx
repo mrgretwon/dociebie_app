@@ -1,3 +1,4 @@
+import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useEffect, useState } from "react";
 import {
   ScrollView,
@@ -32,6 +33,7 @@ type PaymentGroup = {
 
 export default function PaymentHistoryScreen() {
   const router = useRouter();
+  const goBack = useSafeBack();
   const { token } = useAuth();
   const [loading, setLoading] = useState(true);
   const [groups, setGroups] = useState<PaymentGroup[]>([]);
@@ -158,7 +160,7 @@ export default function PaymentHistoryScreen() {
         <View style={styles.bottomButtons}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={() => goBack()}
           >
             <Text style={styles.backButtonText}>Wróć</Text>
           </TouchableOpacity>

@@ -1,3 +1,4 @@
+import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useEffect, useState } from "react";
 import {
   Image,
@@ -39,6 +40,7 @@ import { Toast } from "toastify-react-native";
 export default function EditEmployeeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const goBack = useSafeBack();
   const { token } = useAuth();
   const isNew = id === "new";
 
@@ -81,7 +83,7 @@ export default function EditEmployeeScreen() {
         await updateProviderEmployee(Number(id), { name, surname }, token);
         Toast.success("Dane pracownika zostały zaktualizowane");
       }
-      router.back();
+      goBack();
     } catch {
       Toast.error("Nie udało się zapisać danych pracownika");
     } finally {
@@ -113,7 +115,7 @@ export default function EditEmployeeScreen() {
     try {
       await deleteProviderEmployee(Number(id), token);
       Toast.success("Pracownik został usunięty");
-      router.back();
+      goBack();
     } catch {
       Toast.error("Nie udało się usunąć pracownika");
     }
@@ -193,7 +195,7 @@ export default function EditEmployeeScreen() {
           )}
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={() => goBack()}
           >
             <Text style={styles.backButtonText}>Wróć</Text>
           </TouchableOpacity>
