@@ -12,12 +12,6 @@
       "supportsTablet": true
     },
     "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#002B8A",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.grz.lucki.dociebieprovider"
@@ -34,10 +28,7 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#002B8A",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "backgroundColor": "#002B8A"
         }
       ],
       "expo-secure-store",

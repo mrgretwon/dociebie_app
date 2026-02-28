@@ -1,4 +1,4 @@
-import { blackFont, greyFont } from "@/constants/style-vars";
+import { blackFont, greyedOutFont, greyFont } from "@/constants/style-vars";
 import React from "react";
 import { StyleSheet, TextInput } from "react-native";
 
@@ -24,6 +24,7 @@ const TextInputComponent = ({
       value={text}
       onChangeText={setText}
       placeholder={placeholderText}
+      placeholderTextColor={greyedOutFont}
     />
   );
 };
