@@ -1,5 +1,7 @@
-import { greyFont } from "@/constants/style-vars";
+import { greyedOutFont, greyFont, lightGrey, primaryColor } from "@/constants/style-vars";
+import { Fonts } from "@/constants/theme";
 import SalonEmployeeModel from "@/models/data-models/salonEmployeeModel";
+import { AntDesign } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import EmployeeInfoWithIcon from "./EmployeeInfoWithIcon";
@@ -22,66 +24,98 @@ const EmployeeDropdown = ({
     setIsExpanded(false);
   };
 
-  const renderDropdownItem = (employee: SalonEmployeeModel, isFirst: boolean) => (
-    <TouchableOpacity key={employee.id} onPress={() => handleEmployeeClicked(employee)}>
-      <EmployeeInfoWithIcon
-        employee={employee}
-        style={isFirst ? styles.firstDropdownItem : styles.dropdownItem}
-      />
-    </TouchableOpacity>
-  );
-
-  const renderDropdown = () => {
-    return (
-      <View style={styles.dropdown}>
-        {employeeList.length !== 0 &&
-          employeeList.map((emploee, i) => renderDropdownItem(emploee, i === 0))}
-      </View>
-    );
-  };
-
   return (
     <View>
       <TouchableOpacity
-        style={styles.dropdownHeader}
+        style={[styles.dropdownHeader, isExpanded && styles.dropdownHeaderActive]}
         onPress={() => setIsExpanded((prev) => !prev)}
       >
-        {!!selectedEmployee ? (
+        {selectedEmployee ? (
           <EmployeeInfoWithIcon employee={selectedEmployee} />
         ) : (
-          <Text>Wybierz osobę...</Text>
+          <Text style={styles.placeholderText}>Wybierz osobę...</Text>
         )}
+        <AntDesign
+          name={isExpanded ? "up" : "down"}
+          size={16}
+          color={greyFont}
+        />
       </TouchableOpacity>
-      {isExpanded && renderDropdown()}
+
+      {isExpanded && (
+        <View style={styles.dropdown}>
+          {employeeList.length === 0 ? (
+            <Text style={styles.emptyText}>Brak pracowników</Text>
+          ) : (
+            employeeList.map((employee) => {
+              const isSelected = selectedEmployee?.id === employee.id;
+              return (
+                <TouchableOpacity
+                  key={employee.id}
+                  style={[styles.dropdownItem, isSelected && styles.dropdownItemSelected]}
+                  onPress={() => handleEmployeeClicked(employee)}
+                >
+                  <EmployeeInfoWithIcon employee={employee} />
+                  {isSelected && (
+                    <AntDesign name="check" size={16} color={primaryColor} />
+                  )}
+                </TouchableOpacity>
+              );
+            })
+          )}
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-  },
   dropdownHeader: {
     width: "100%",
-    padding: 16,
-    borderWidth: 2,
-    borderColor: greyFont,
-    borderRadius: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 14,
+    borderWidth: 1,
+    borderColor: lightGrey,
+    borderRadius: 12,
+    backgroundColor: "white",
+  },
+  dropdownHeaderActive: {
+    borderColor: primaryColor,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  placeholderText: {
+    color: greyedOutFont,
+    fontFamily: Fonts.regular,
   },
   dropdown: {
     borderWidth: 1,
-    borderColor: greyFont,
-    borderRadius: 16,
+    borderTopWidth: 0,
+    borderColor: primaryColor,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+    backgroundColor: "white",
+    overflow: "hidden",
   },
   dropdownItem: {
-    borderTopColor: greyFont,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderTopColor: lightGrey,
     borderTopWidth: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
   },
-  firstDropdownItem: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+  dropdownItemSelected: {
+    backgroundColor: "#F0F4FF",
+  },
+  emptyText: {
+    color: greyedOutFont,
+    fontFamily: Fonts.regular,
+    padding: 14,
+    textAlign: "center",
   },
 });
 

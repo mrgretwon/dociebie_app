@@ -2,25 +2,32 @@ import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import Button from "@/components/Button";
-import { darkGreyFont, greyedOutFont, greyFont, smallFontSize } from "@/constants/style-vars";
+import { greyedOutFont, greyFont, smallFontSize } from "@/constants/style-vars";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTranslations } from "@/hooks/use-translations";
 import SalonEmployeeModel from "@/models/data-models/salonEmployeeModel";
-import { fetchSalon } from "@/services/api";
+import { createAppointment, fetchSalon } from "@/services/api";
 import { AntDesign } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Toast } from "toastify-react-native";
 import AppointmentDateTimePicker from "./AppointmentDateTimePicker";
-import BookingConfirmationModal from "./BookingConfirmationModal";
 import EmployeeDropdown from "./EmployeeDropdown";
 
-export default function UserDataScreen() {
+export default function AppointmentScreen() {
   const translate = useTranslations();
   const router = useRouter();
-  const { salonId } = useLocalSearchParams<{ salonId?: string }>();
+  const { token } = useAuth();
+  const { salonId, serviceId } = useLocalSearchParams<{
+    salonId?: string;
+    serviceId?: string;
+  }>();
 
   const [selectedEmployee, setSelectedEmployee] = useState<SalonEmployeeModel | null>(null);
   const [employeeList, setEmployeeList] = useState<SalonEmployeeModel[]>([]);
-  const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [selectedHour, setSelectedHour] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (salonId) {
@@ -30,14 +37,51 @@ export default function UserDataScreen() {
     }
   }, [salonId]);
 
-  const handleConfirmationModalPay = () => {
-    setIsConfirmationModalVisible(false);
-    router.navigate("/(appointment-confirmed)");
-  };
+  const handleBook = async () => {
+    if (!selectedHour) {
+      Toast.error("Wybierz godzinę wizyty");
+      return;
+    }
+    if (!selectedEmployee) {
+      Toast.error("Wybierz pracownika");
+      return;
+    }
+    if (!salonId || !serviceId) {
+      Toast.error("Brak danych salonu lub usługi");
+      return;
+    }
+    if (!token) {
+      Toast.error("Musisz być zalogowany");
+      return;
+    }
 
-  const handleConfirmationModalClosed = () => {
-    setIsConfirmationModalVisible(false);
-    router.back();
+    const [hours, minutes] = selectedHour.split(":");
+    const appointmentDate = new Date(date);
+    appointmentDate.setHours(+hours, +minutes, 0, 0);
+
+    const year = appointmentDate.getFullYear();
+    const month = String(appointmentDate.getMonth() + 1).padStart(2, "0");
+    const day = String(appointmentDate.getDate()).padStart(2, "0");
+    const isoDateTime = `${year}-${month}-${day}T${selectedHour}:00`;
+
+    setIsSubmitting(true);
+    try {
+      await createAppointment(
+        {
+          salon: +salonId,
+          service: +serviceId,
+          employee: selectedEmployee.id,
+          date: isoDateTime,
+        },
+        token
+      );
+      router.navigate("/(appointment-confirmed)");
+    } catch (err) {
+      console.warn("Failed to create appointment:", err);
+      Toast.error("Nie udało się umówić wizyty. Spróbuj ponownie.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -45,7 +89,14 @@ export default function UserDataScreen() {
       <View style={styles.container}>
         <ScrollView style={styles.contentScroll} showsVerticalScrollIndicator={false}>
           <View style={styles.contentWrappper}>
-            <AppointmentDateTimePicker />
+            <AppointmentDateTimePicker
+              date={date}
+              setDate={setDate}
+              selectedHour={selectedHour}
+              setSelectedHour={setSelectedHour}
+              salonId={salonId ? +salonId : 0}
+              serviceId={serviceId ? +serviceId : 0}
+            />
 
             <Text style={styles.employeeInfoText}>{translate("EMPLOYEE_DOING_SERVICE")}</Text>
 
@@ -57,10 +108,6 @@ export default function UserDataScreen() {
 
             <View style={styles.iconsContainer}>
               <TouchableOpacity style={styles.iconWithTextContainer}>
-                <AntDesign name="plus-circle" size={28} color={darkGreyFont} />
-                <Text style={styles.addIconText}>{translate("ADD_ANOTHER_SERVICE")}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.iconWithTextContainer, { marginTop: 16 }]}>
                 <AntDesign name="message" size={28} color={greyedOutFont} />
                 <Text style={styles.messageIconText}>{translate("LEAVE_MESSAGE")}</Text>
               </TouchableOpacity>
@@ -68,17 +115,12 @@ export default function UserDataScreen() {
 
             <Button
               text={translate("BOOK")}
-              onClick={() => setIsConfirmationModalVisible(true)}
+              onClick={handleBook}
               style={styles.bookButton}
+              disabled={isSubmitting}
             />
           </View>
         </ScrollView>
-
-        <BookingConfirmationModal
-          visible={isConfirmationModalVisible}
-          onPay={() => handleConfirmationModalPay()}
-          onClose={() => handleConfirmationModalClosed()}
-        />
       </View>
     </SafeAreaView>
   );
@@ -114,13 +156,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-start",
     alignItems: "center",
-  },
-  addIconText: {
-    color: darkGreyFont,
-    fontWeight: "600",
-
-    fontSize: smallFontSize,
-    marginLeft: 16,
   },
   messageIconText: {
     color: greyedOutFont,

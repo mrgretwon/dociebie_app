@@ -75,6 +75,11 @@ function authenticatedRequest<T>(
   });
 }
 
+/** Unwrap DRF paginated responses ({ results: T[] }) or plain arrays. */
+function unwrapList<T>(data: T[] | { results: T[] }): T[] {
+  return Array.isArray(data) ? data : data.results;
+}
+
 function formatDate(date: Date): string {
   return date.toISOString().split("T")[0]; // YYYY-MM-DD
 }
@@ -158,7 +163,7 @@ export async function updateUserProfileData(
     if (profileUpdateData.name !== undefined) body.name = profileUpdateData.name;
     if (profileUpdateData.surname !== undefined) body.surname = profileUpdateData.surname;
     if (profileUpdateData.email !== undefined) body.email = profileUpdateData.email;
-    if (profileUpdateData.newPassword !== undefined) body.password = profileUpdateData.newPassword;
+    if (profileUpdateData.newPassword !== undefined) body.new_password = profileUpdateData.newPassword;
 
     await authenticatedRequest<unknown>(`${API_URL}/auth/profile/`, token, {
       method: "PATCH",
@@ -177,11 +182,21 @@ export async function updateUserProfileData(
 // Categories
 // ---------------------------------------------------------------------------
 
-export async function fetchCategories(): Promise<string[]> {
-  const data = await request<{ id: number; name: string }[]>(
+export type CategoryItem = {
+  id: number;
+  name: string;
+  icon: string | null;
+};
+
+export async function fetchCategories(): Promise<CategoryItem[]> {
+  const data = await request<CategoryItem[] | { results: CategoryItem[] }>(
     `${API_URL}/categories/`
   );
-  return data.map((c) => c.name);
+  const list = unwrapList(data);
+  return list.map((c) => ({
+    ...c,
+    icon: c.icon ? `${BASE_URL}${c.icon}` : null,
+  }));
 }
 
 // ---------------------------------------------------------------------------
@@ -193,16 +208,22 @@ export async function fetchAllSalons(params: SalonsSearchRequestParams): Promise
 
   if (params.searchText) queryParts.push(`search=${encodeURIComponent(params.searchText)}`);
   if (params.locationText) queryParts.push(`location=${encodeURIComponent(params.locationText)}`);
-  if (params.startDate) queryParts.push(`start_date=${formatDate(params.startDate)}`);
-  if (params.endDate) queryParts.push(`end_date=${formatDate(params.endDate)}`);
+  if (params.date) queryParts.push(`start_date=${formatDate(params.date)}`);
+  if (params.startHour) queryParts.push(`start_hour=${encodeURIComponent(params.startHour)}`);
+  if (params.endHour) queryParts.push(`end_hour=${encodeURIComponent(params.endHour)}`);
+  if (params.latitude != null && params.longitude != null) {
+    queryParts.push(`lat=${params.latitude}`);
+    queryParts.push(`lng=${params.longitude}`);
+    queryParts.push(`distance=${params.distance}`);
+  }
 
   const queryString = queryParts.length > 0 ? `?${queryParts.join("&")}` : "";
 
-  const data = await request<SalonModelResponseDto[]>(
+  const data = await request<SalonModelResponseDto[] | { results: SalonModelResponseDto[] }>(
     `${API_URL}/salons/${queryString}`
   );
 
-  return data.map((dto) => salonModelFromResponseDto(dto, BASE_URL));
+  return unwrapList(data).map((dto) => salonModelFromResponseDto(dto, BASE_URL));
 }
 
 export async function fetchSalon(salonId: number): Promise<SalonModel> {
@@ -214,19 +235,39 @@ export async function fetchSalon(salonId: number): Promise<SalonModel> {
 }
 
 export async function fetchSalonServices(salonId: number): Promise<ServiceModel[]> {
-  const data = await request<ServiceResponseDto[]>(
+  const data = await request<ServiceResponseDto[] | { results: ServiceResponseDto[] }>(
     `${API_URL}/salons/${salonId}/services/`
   );
 
-  return data.map(serviceModelFromResponseDto);
+  return unwrapList(data).map(serviceModelFromResponseDto);
 }
 
 export async function fetchSalonReviews(salonId: number): Promise<OpinionModel[]> {
-  const data = await request<ReviewResponseDto[]>(
+  const data = await request<ReviewResponseDto[] | { results: ReviewResponseDto[] }>(
     `${API_URL}/salons/${salonId}/reviews/`
   );
 
-  return data.map(opinionModelFromResponseDto);
+  return unwrapList(data).map(opinionModelFromResponseDto);
+}
+
+// ---------------------------------------------------------------------------
+// Available Slots (public)
+// ---------------------------------------------------------------------------
+
+export type AvailableSlot = {
+  start_time: string;
+  end_time: string;
+  available: boolean;
+};
+
+export async function fetchSalonAvailableSlots(
+  salonId: number,
+  date: string,
+  serviceId: number
+): Promise<AvailableSlot[]> {
+  return request<AvailableSlot[]>(
+    `${API_URL}/salons/${salonId}/available-slots/?date=${date}&service_id=${serviceId}`
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -236,12 +277,12 @@ export async function fetchSalonReviews(salonId: number): Promise<OpinionModel[]
 export async function fetchClientAppointmentHistory(
   token: string
 ): Promise<AppointmentModel[]> {
-  const data = await authenticatedRequest<AppointmentResponseDto[]>(
+  const data = await authenticatedRequest<AppointmentResponseDto[] | { results: AppointmentResponseDto[] }>(
     `${API_URL}/appointments/`,
     token
   );
 
-  return data.map(appointmentModelFromResponseDto);
+  return unwrapList(data).map(appointmentModelFromResponseDto);
 }
 
 export async function createAppointment(
@@ -249,12 +290,11 @@ export async function createAppointment(
     salon: number;
     service: number;
     employee: number;
-    scheduled_date: string; // YYYY-MM-DD
-    scheduled_time: string; // HH:MM
+    date: string; // ISO datetime: YYYY-MM-DDTHH:MM:SS
   },
   token: string
-): Promise<AppointmentModel> {
-  const data = await authenticatedRequest<AppointmentResponseDto>(
+): Promise<unknown> {
+  return authenticatedRequest<unknown>(
     `${API_URL}/appointments/`,
     token,
     {
@@ -262,8 +302,6 @@ export async function createAppointment(
       body: JSON.stringify(appointmentData),
     }
   );
-
-  return appointmentModelFromResponseDto(data);
 }
 
 // ---------------------------------------------------------------------------

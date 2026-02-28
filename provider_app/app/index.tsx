@@ -1,17 +1,64 @@
-import Spinner from "@/components/Spinner";
+import logoWhite from "@/assets/images/logo-dociebie_white_new.png";
+import { primaryColor } from "@/constants/style-vars";
 import { useAuth } from "@/contexts/AuthContext";
-import { Redirect } from "expo-router";
+import { useRouter } from "expo-router";
+import { useEffect } from "react";
+import { Image, StyleSheet, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from "react-native-reanimated";
 
-export default function IndexRedirect() {
+export default function SplashScreen() {
+  const router = useRouter();
   const { token, isHydrating } = useAuth();
+  const opacity = useSharedValue(1);
 
-  if (isHydrating) {
-    return <Spinner />;
-  }
+  useEffect(() => {
+    if (isHydrating) return;
 
-  if (token) {
-    return <Redirect href="/(dashboard)" />;
-  }
+    // Start fading out after 0.5s, fade takes 1s → total 1.5s
+    opacity.value = withDelay(500, withTiming(0, { duration: 1000 }));
 
-  return <Redirect href="/(auth)/login" />;
+    const timeout = setTimeout(() => {
+      if (token) {
+        router.replace("/(dashboard)");
+      } else {
+        router.replace("/(auth)/login");
+      }
+    }, 1500);
+
+    return () => clearTimeout(timeout);
+  }, [isHydrating]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  return (
+    <View style={styles.container}>
+      <Animated.View style={animatedStyle}>
+        <Image
+          source={logoWhite}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </Animated.View>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: primaryColor,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logo: {
+    width: 360,
+    aspectRatio: 1582 / 310,
+  },
+});

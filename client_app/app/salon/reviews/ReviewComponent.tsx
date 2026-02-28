@@ -1,24 +1,28 @@
+import StarSvg from "@/assets/svg/star-svg";
 import { blackFont, greyedOutFont, largeFontSize, smallFontSize } from "@/constants/style-vars";
 import { OpinionModel } from "@/models/data-models/opinionModel";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { AirbnbRating } from "react-native-ratings";
 
 interface ReviewComponentProps {
   review: OpinionModel;
   style?: object;
 }
 
+const StarRating = ({ rating }: { rating: number }) => (
+  <View style={styles.starsContainer}>
+    {[1, 2, 3, 4, 5].map((i) => (
+      <View key={i} style={{ opacity: i <= rating ? 1 : 0.25 }}>
+        <StarSvg />
+      </View>
+    ))}
+  </View>
+);
+
 const ReviewComponent = ({ review, style = {} }: ReviewComponentProps) => {
   return (
     <View style={[styles.container, style]}>
-      <AirbnbRating
-        defaultRating={review.rating}
-        showRating={false}
-        size={18}
-        isDisabled
-        ratingContainerStyle={styles.starsContainer}
-      />
+      <StarRating rating={review.rating} />
       <Text style={styles.reviewText}>{review.opinionText}</Text>
       <Text style={styles.reviewName}>{review.customerName}</Text>
       <Text style={styles.locationText}>{review.customerLocation}</Text>
@@ -44,6 +48,8 @@ const styles = StyleSheet.create({
     fontSize: smallFontSize,
   },
   starsContainer: {
+    flexDirection: "row",
+    gap: 4,
     alignSelf: "flex-start",
   },
 });

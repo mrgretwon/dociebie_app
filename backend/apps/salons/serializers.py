@@ -4,9 +4,16 @@ from .models import Category, Employee, OpeningHours, Review, Salon, Service
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    icon = serializers.SerializerMethodField()
+
     class Meta:
         model = Category
-        fields = ("id", "name")
+        fields = ("id", "name", "icon")
+
+    def get_icon(self, obj) -> str | None:
+        if obj.icon:
+            return f"/static/icons/categories/{obj.icon}.svg"
+        return None
 
 
 class EmployeeSerializer(serializers.ModelSerializer):
@@ -18,7 +25,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
 class OpeningHoursSerializer(serializers.ModelSerializer):
     class Meta:
         model = OpeningHours
-        fields = ("text",)
+        fields = ("day_of_week", "open_time", "close_time")
 
 
 class ServiceSerializer(serializers.ModelSerializer):
@@ -51,13 +58,24 @@ class SalonListSerializer(serializers.ModelSerializer):
             "phone_number",
             "mail",
             "rating",
+            "latitude",
+            "longitude",
             "opening_hours",
             "employees",
             "main_image",
-            "services_image",
-            "reviews_image",
-            "details_image",
         )
 
-    def get_opening_hours(self, obj) -> list[str]:
-        return list(obj.opening_hours.values_list("text", flat=True))
+    def get_opening_hours(self, obj) -> list[dict]:
+        DAY_NAMES_SHORT = {
+            0: "Pon", 1: "Wt", 2: "Śr", 3: "Czw", 4: "Pt", 5: "Sob", 6: "Ndz",
+        }
+        result = []
+        for h in obj.opening_hours.all():
+            day_name = DAY_NAMES_SHORT.get(h.day_of_week, "?")
+            result.append({
+                "day_of_week": h.day_of_week,
+                "open_time": h.open_time.strftime("%H:%M"),
+                "close_time": h.close_time.strftime("%H:%M"),
+                "display": f"{day_name} {h.open_time:%H:%M} – {h.close_time:%H:%M}",
+            })
+        return result

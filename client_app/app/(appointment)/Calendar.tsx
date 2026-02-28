@@ -4,6 +4,7 @@ import {
   greyedOutFont,
   greyFont,
   largeFontSize,
+  lightGrey,
   smallestFontSize,
   smallFontSize,
 } from "@/constants/style-vars";
@@ -18,13 +19,21 @@ interface CalendarProps {
 }
 
 const Calendar = ({ date, setDate }: CalendarProps) => {
-  const [currentYear] = useState(new Date().getFullYear());
+  const today = new Date();
+  const todayYear = today.getFullYear();
+  const todayMonth = today.getMonth();
+  const todayDay = today.getDate();
+
   const [year, setYear] = useState(date.getFullYear());
   const [month, setMonth] = useState(date.getMonth());
   const [day, setDay] = useState<number | null>(date.getDate());
   const [calendarRows, setCalendarRows] = useState<(number | null)[][]>([]);
 
+  const isCurrentOrPastMonth = year < todayYear || (year === todayYear && month <= todayMonth);
+
   const handleDecrementMonth = (): void => {
+    // Don't go before current month
+    if (year === todayYear && month === todayMonth) return;
     if (month === 0) {
       setYear((prev) => prev - 1);
     }
@@ -36,6 +45,13 @@ const Calendar = ({ date, setDate }: CalendarProps) => {
       setYear((prev) => prev + 1);
     }
     setMonth((prev) => (prev + 1) % 12);
+  };
+
+  const isDayInPast = (dayNum: number): boolean => {
+    if (year < todayYear) return true;
+    if (year === todayYear && month < todayMonth) return true;
+    if (year === todayYear && month === todayMonth && dayNum < todayDay) return true;
+    return false;
   };
 
   useEffect(() => {
@@ -64,38 +80,53 @@ const Calendar = ({ date, setDate }: CalendarProps) => {
     setCalendarRows(rows);
   }, [month, year]);
 
+  const handleDayPress = (dayNum: number | null) => {
+    if (!dayNum || isDayInPast(dayNum)) return;
+    setDay(dayNum);
+    const newDate = new Date(year, month, dayNum);
+    setDate(newDate);
+  };
+
   const generateCalendarRows = useCallback((): React.ReactElement => {
     return (
       <View style={styles.calendarRows}>
         {calendarRows.map((row, i) => (
           <View key={i} style={styles.calendarRow}>
-            {row.map((item, j) => (
-              <TouchableOpacity
-                key={j}
-                onPress={() => setDay(item)}
-                style={
-                  day === item
-                    ? styles.selectedCalendarDayItemWrapper
-                    : styles.nonselectedCalendarDayItemWrapper
-                }
-              >
-                <Text
-                  style={[
-                    styles.calendarDayItem,
-                    day === item
-                      ? styles.selectedCalendarDayItemColor
-                      : styles.nonselectedCalendarDayItemColor,
-                  ]}
+            {row.map((item, j) => {
+              const isPast = item ? isDayInPast(item) : false;
+              const isSelected = day === item;
+
+              return (
+                <TouchableOpacity
+                  key={j}
+                  onPress={() => handleDayPress(item)}
+                  disabled={!item || isPast}
+                  style={
+                    isSelected
+                      ? styles.selectedCalendarDayItemWrapper
+                      : styles.nonselectedCalendarDayItemWrapper
+                  }
                 >
-                  {item ?? ""}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    style={[
+                      styles.calendarDayItem,
+                      isSelected
+                        ? styles.selectedCalendarDayItemColor
+                        : isPast
+                          ? styles.pastCalendarDayItemColor
+                          : styles.nonselectedCalendarDayItemColor,
+                    ]}
+                  >
+                    {item ?? ""}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         ))}
       </View>
     );
-  }, [calendarRows, day]);
+  }, [calendarRows, day, month, year]);
 
   return (
     <View style={styles.container}>
@@ -103,12 +134,12 @@ const Calendar = ({ date, setDate }: CalendarProps) => {
         <MaterialIcons
           name="keyboard-arrow-left"
           size={35}
-          style={styles.arrowIcon}
+          style={[styles.arrowIcon, isCurrentOrPastMonth && { opacity: 0.3 }]}
           onPress={() => handleDecrementMonth()}
         />
         <View style={styles.headerText}>
           <Text style={styles.monthText}>{monthNames[month]}</Text>
-          {currentYear !== year && <Text style={styles.yearText}>{year}</Text>}
+          {todayYear !== year && <Text style={styles.yearText}>{year}</Text>}
         </View>
         <MaterialIcons
           name="keyboard-arrow-right"
@@ -200,6 +231,9 @@ const styles = StyleSheet.create({
   },
   nonselectedCalendarDayItemColor: {
     color: greyedOutFont,
+  },
+  pastCalendarDayItemColor: {
+    color: lightGrey,
   },
 });
 

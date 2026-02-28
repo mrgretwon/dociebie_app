@@ -32,7 +32,7 @@ const SalonDetailsScreen = () => {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollContainer}>
-        <ImageWithRoundedBottom />
+        <ImageWithRoundedBottom imageUri={salon.mainImage} />
 
         <Text style={styles.headerText}>{salon?.name}</Text>
 

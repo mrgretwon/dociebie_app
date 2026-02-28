@@ -56,6 +56,6 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
 def get_tokens_for_user(user) -> dict:
     refresh = RefreshToken.for_user(user)
     return {
-        "token": str(refresh.access_token),
+        "access": str(refresh.access_token),
         "refresh": str(refresh),
     }

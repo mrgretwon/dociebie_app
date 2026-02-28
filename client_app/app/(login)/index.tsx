@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-import logoCyanImage from "@/assets/images/logo-cyan.png";
+import logoCyanImage from "@/assets/images/logo-dociebie.png";
 import Button from "@/components/Button";
 import TextInputComponent from "@/components/TextInputComponent";
 import {
@@ -47,7 +47,7 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.contentWrapper}>
-        <Image source={logoCyanImage} style={styles.logo} contentFit="cover" />
+        <Image source={logoCyanImage} style={styles.logo} contentFit="contain" />
 
         <TextInputComponent
           text={email}
@@ -149,8 +149,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   logo: {
-    width: 200,
-    aspectRatio: 3,
+    width: 260,
+    aspectRatio: 1582 / 310,
     alignSelf: "center",
     marginBottom: 24,
   },

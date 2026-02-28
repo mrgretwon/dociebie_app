@@ -33,8 +33,9 @@ urlpatterns = [
 
     # Appointments
     path("appointments/", views.ProviderAppointmentListCreateView.as_view(), name="appointment-list"),
-    path("appointments/<int:pk>/", views.ProviderAppointmentDetailView.as_view(), name="appointment-detail"),
+    path("appointments/pending-count/", views.ProviderPendingCountView.as_view(), name="appointment-pending-count"),
     path("appointments/available-slots/", views.ProviderAvailableSlotsView.as_view(), name="available-slots"),
+    path("appointments/<int:pk>/", views.ProviderAppointmentDetailView.as_view(), name="appointment-detail"),
 
     # Financial
     path("financial-summary/", views.ProviderFinancialSummaryView.as_view(), name="financial-summary"),

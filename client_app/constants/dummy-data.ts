@@ -117,9 +117,6 @@ export const salon: SalonModel = {
   openingHours: ["Pon-Pt od 9:00 do 17:00", "Sob od 9:00 do 15:00"],
   employees: sampleEmployees,
   mainImage: "",
-  servicesImage: "",
-  opinionsImage: "",
-  detailsImage: "",
 };
 
 export const sampleAppointments: AppointmentModel[] = [

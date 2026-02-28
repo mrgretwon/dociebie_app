@@ -6,6 +6,7 @@ from .models import Category, Employee, OpeningHours, Review, Salon, Service
 class OpeningHoursInline(admin.TabularInline):
     model = OpeningHours
     extra = 1
+    fields = ("day_of_week", "open_time", "close_time", "order")
 
 
 class EmployeeInline(admin.TabularInline):
@@ -25,7 +26,7 @@ class ReviewInline(admin.TabularInline):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name")
+    list_display = ("id", "name", "icon")
     search_fields = ("name",)
 
 

@@ -41,6 +41,7 @@ const ClientAppointment = ({ appointment }: AppointmentProps) => {
         </Text>
       </View>
       <Text style={styles.infoText}>{appointment.salonName}</Text>
+      <Text style={styles.addressText}>{appointment.salonAddress}</Text>
       <Button
         onClick={() => router.push("/(appointment)")}
         style={{ marginTop: 32 }}
@@ -96,6 +97,11 @@ const styles = StyleSheet.create({
     fontSize: smallFontSize,
     color: greyedOutFont,
     marginTop: 2,
+  },
+  addressText: {
+    fontSize: smallFontSize,
+    color: greyedOutFont,
+    marginTop: 4,
   },
 });
 

@@ -118,7 +118,7 @@ export default function ServicesListScreen() {
           />
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={() => router.navigate("/(dashboard)")}
           >
             <Text style={styles.backButtonText}>Wróć</Text>
           </TouchableOpacity>

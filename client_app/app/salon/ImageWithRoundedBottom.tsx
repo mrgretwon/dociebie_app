@@ -1,9 +1,19 @@
-import salon from "@/assets/images/salon.png";
+import salonPlaceholder from "@/assets/images/salon.png";
 import { Image } from "expo-image";
 import { StyleSheet } from "react-native";
 
-const ImageWithRoundedBottom = () => {
-  return <Image style={styles.image} contentFit="cover" source={salon as any} />;
+interface ImageWithRoundedBottomProps {
+  imageUri?: string;
+}
+
+const ImageWithRoundedBottom = ({ imageUri }: ImageWithRoundedBottomProps) => {
+  return (
+    <Image
+      style={styles.image}
+      contentFit="cover"
+      source={imageUri || salonPlaceholder}
+    />
+  );
 };
 
 const styles = StyleSheet.create({

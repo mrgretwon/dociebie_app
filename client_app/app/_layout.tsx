@@ -11,6 +11,8 @@ import ToastManager from "toastify-react-native";
 
 import Header from "@/components/Header";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CategoriesProvider } from "@/contexts/CategoriesContext";
+import { SalonsSearchProvider } from "@/contexts/SalonsSearchContext";
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -26,26 +28,38 @@ export default function RootLayout() {
   return (
     <>
       <ToastManager position="bottom" />
+      <CategoriesProvider>
       <AuthProvider>
-        <Stack initialRouteName="(home)">
-          <Stack.Screen name="(home)" options={{ headerShown: false }} />
-          <Stack.Screen name="(history)" options={{ headerShown: false }} />
-          <Stack.Screen name="(profile)" options={{ headerShown: false }} />
-          <Stack.Screen name="(user-data)" options={{ headerShown: false }} />
-          <Stack.Screen name="(salons)" options={{ headerShown: false }} />
-          <Stack.Screen name="(appointment)" options={{ headerShown: false }} />
-          <Stack.Screen name="(login)" options={{ headerShown: false }} />
-          <Stack.Screen name="(register)" options={{ headerShown: false }} />
-          <Stack.Screen name="(payments)" options={{ headerShown: false }} />
-          <Stack.Screen name="(appointment-confirmed)" options={{ headerShown: false }} />
-          <Stack.Screen name="salon" options={{ headerShown: false }} />
+        <SalonsSearchProvider>
+        <Stack
+          initialRouteName="(home)"
+          screenOptions={{
+            headerShown: false,
+            animation: "fade",
+            animationDuration: 200,
+          }}
+        >
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(home)" />
+          <Stack.Screen name="(history)" />
+          <Stack.Screen name="(profile)" />
+          <Stack.Screen name="(user-data)" options={{ animation: "slide_from_bottom" }} />
+          <Stack.Screen name="(salons)" />
+          <Stack.Screen name="(appointment)" />
+          <Stack.Screen name="(login)" />
+          <Stack.Screen name="(register)" />
+          <Stack.Screen name="(payments)" />
+          <Stack.Screen name="(appointment-confirmed)" />
+          <Stack.Screen name="salon" options={{ animation: "slide_from_right" }} />
           <Stack.Screen
             name="modal"
             options={{ presentation: "modal", header: () => <Header variant="grey" /> }}
           />
         </Stack>
         <StatusBar style="auto" />
+        </SalonsSearchProvider>
       </AuthProvider>
+      </CategoriesProvider>
     </>
   );
 }

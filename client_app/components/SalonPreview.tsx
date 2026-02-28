@@ -11,7 +11,6 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 // import SalonPreviewProps from '../../../models/props/salonPreviewProps'
 // import styles, { maxWidth } from './SalonPreview.style'
 import { Image } from "expo-image";
-// import salonPreview from "../../../../assets/salonPreview.png"
 import salonPreviewImage from "@/assets/images/salon-preview.png";
 import StarSvg from "@/assets/svg/star-svg";
 import { useTranslations } from "@/hooks/use-translations";
@@ -30,7 +29,7 @@ const SalonPreview = ({ salon, onClick, style = {} }: SalonPreviewProps) => {
   return (
     <TouchableOpacity style={[styles.container, style]} onPress={() => onClick(salon)}>
       <Image
-        source={salonPreviewImage}
+        source={salon.mainImage || salonPreviewImage}
         style={[styles.image, { width: maxWidth, aspectRatio: 1 }]}
         contentFit="cover"
       />

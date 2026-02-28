@@ -12,12 +12,18 @@ type SalonsSearchContextValue = {
   setSearchText: Dispatch<SetStateAction<string>>;
   locationText: string;
   setLocationText: Dispatch<SetStateAction<string>>;
-  startDate: Date;
-  setStartDate: Dispatch<SetStateAction<Date>>;
-  endDate: Date;
-  setEndDate: Dispatch<SetStateAction<Date>>;
+  date: Date;
+  setDate: Dispatch<SetStateAction<Date>>;
+  startHour: string;
+  setStartHour: Dispatch<SetStateAction<string>>;
+  endHour: string;
+  setEndHour: Dispatch<SetStateAction<string>>;
   distance: number;
   setDistance: Dispatch<SetStateAction<number>>;
+  userLatitude: number | null;
+  setUserLatitude: Dispatch<SetStateAction<number | null>>;
+  userLongitude: number | null;
+  setUserLongitude: Dispatch<SetStateAction<number | null>>;
 };
 
 const SalonsSearchContext = createContext<SalonsSearchContextValue | undefined>(undefined);
@@ -25,13 +31,12 @@ const SalonsSearchContext = createContext<SalonsSearchContextValue | undefined>(
 export const SalonsSearchProvider = ({ children }: { children: React.ReactNode }) => {
   const [searchText, setSearchText] = useState("");
   const [locationText, setLocationText] = useState("");
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(() => {
-    const date = new Date();
-    date.setDate(date.getDate() + 7);
-    return date;
-  });
+  const [date, setDate] = useState(new Date());
+  const [startHour, setStartHour] = useState("");
+  const [endHour, setEndHour] = useState("");
   const [distance, setDistance] = useState(5);
+  const [userLatitude, setUserLatitude] = useState<number | null>(null);
+  const [userLongitude, setUserLongitude] = useState<number | null>(null);
 
   const value = useMemo(
     () => ({
@@ -39,14 +44,20 @@ export const SalonsSearchProvider = ({ children }: { children: React.ReactNode }
       setSearchText,
       locationText,
       setLocationText,
-      startDate,
-      setStartDate,
-      endDate,
-      setEndDate,
+      date,
+      setDate,
+      startHour,
+      setStartHour,
+      endHour,
+      setEndHour,
       distance,
       setDistance,
+      userLatitude,
+      setUserLatitude,
+      userLongitude,
+      setUserLongitude,
     }),
-    [searchText, locationText, startDate, endDate, distance]
+    [searchText, locationText, date, startHour, endHour, distance, userLatitude, userLongitude]
   );
 
   return <SalonsSearchContext.Provider value={value}>{children}</SalonsSearchContext.Provider>;

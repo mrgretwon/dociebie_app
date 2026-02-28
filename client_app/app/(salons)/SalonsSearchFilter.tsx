@@ -23,17 +23,50 @@ const SalonsSearchFilter = () => {
     setSearchText,
     locationText,
     setLocationText,
-    startDate,
-    setStartDate,
-    endDate,
-    setEndDate,
+    date,
+    setDate,
+    startHour,
+    setStartHour,
+    endHour,
+    setEndHour,
     distance,
     setDistance,
+    setUserLatitude,
+    setUserLongitude,
   } = useSalonsSearch();
 
-  const [isStartDatePickerOpened, setIsDatePickerOpened] = useState(false);
-  const [isEndDatePickerOpened, setIsEndDatePickerOpened] = useState(false);
+  const [isDatePickerOpened, setIsDatePickerOpened] = useState(false);
+  const [isStartHourPickerOpened, setIsStartHourPickerOpened] = useState(false);
+  const [isEndHourPickerOpened, setIsEndHourPickerOpened] = useState(false);
   const [isDistanceDropdownOpen, setIsDistanceDropdownOpen] = useState(false);
+
+  const geocodeLocation = async (text: string) => {
+    if (!text.trim()) {
+      setUserLatitude(null);
+      setUserLongitude(null);
+      return;
+    }
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(text)}&format=json&limit=1`,
+        { headers: { "User-Agent": "DoCiebie/1.0" } }
+      );
+      const data = await res.json();
+      if (data.length > 0) {
+        setUserLatitude(parseFloat(data[0].lat));
+        setUserLongitude(parseFloat(data[0].lon));
+      } else {
+        setUserLatitude(null);
+        setUserLongitude(null);
+      }
+    } catch {
+      setUserLatitude(null);
+      setUserLongitude(null);
+    }
+  };
+
+  const startHourDate = parseHourToDate(startHour, 9);
+  const endHourDate = parseHourToDate(endHour, 17);
 
   const distanceLabel = (value: number) => (value === maxDistance ? `MAX km` : `+ ${value} km`);
 
@@ -57,27 +90,49 @@ const SalonsSearchFilter = () => {
           style={styles.locationText}
           value={locationText}
           onChangeText={setLocationText}
+          onBlur={() => geocodeLocation(locationText)}
           placeholder="Wpisz lokalizację..."
         />
       </View>
 
-      <View style={styles.datePickersContainer}>
-        <View style={styles.startDatePickerWrapper}>
+      <View style={styles.dateAndHoursRow}>
+        <View style={styles.datePickerWrapper}>
           <DateTimePicker
             mode="date"
-            isOpen={isStartDatePickerOpened}
+            isOpen={isDatePickerOpened}
             setIsOpen={setIsDatePickerOpened}
-            date={startDate}
-            setDate={setStartDate}
+            date={date}
+            setDate={setDate}
           />
         </View>
-        <View style={styles.endDatePickerWrapper}>
+        <View style={styles.hourPickerWrapper}>
           <DateTimePicker
-            mode="date"
-            isOpen={isEndDatePickerOpened}
-            setIsOpen={setIsEndDatePickerOpened}
-            date={endDate}
-            setDate={setEndDate}
+            mode="time"
+            isOpen={isStartHourPickerOpened}
+            setIsOpen={setIsStartHourPickerOpened}
+            date={startHourDate}
+            setDate={(d) => {
+              if (d instanceof Function) {
+                setStartHour((prev) => formatTime(d(parseHourToDate(prev))));
+              } else {
+                setStartHour(formatTime(d));
+              }
+            }}
+          />
+        </View>
+        <View style={styles.hourPickerWrapper}>
+          <DateTimePicker
+            mode="time"
+            isOpen={isEndHourPickerOpened}
+            setIsOpen={setIsEndHourPickerOpened}
+            date={endHourDate}
+            setDate={(d) => {
+              if (d instanceof Function) {
+                setEndHour((prev) => formatTime(d(parseHourToDate(prev))));
+              } else {
+                setEndHour(formatTime(d));
+              }
+            }}
           />
         </View>
       </View>
@@ -112,6 +167,22 @@ const SalonsSearchFilter = () => {
     </View>
   );
 };
+
+function parseHourToDate(hour: string, fallbackHour = 0): Date {
+  const d = new Date();
+  if (!hour) {
+    d.setHours(fallbackHour, 0, 0, 0);
+    return d;
+  }
+  const [h, m] = hour.split(":").map(Number);
+  d.setHours(h, m, 0, 0);
+  return d;
+}
+
+function formatTime(d: Date): string {
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
 const styles = StyleSheet.create({
   container: {
     width: "100%",
@@ -155,22 +226,16 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
   },
-  datePickersContainer: {
-    width: "100%",
-    display: "flex",
+  dateAndHoursRow: {
     flexDirection: "row",
     marginTop: 8,
+    gap: 8,
   },
-  startDatePickerWrapper: {
-    marginLeft: 16,
-    flexGrow: 1,
-    flexShrink: 1,
+  datePickerWrapper: {
+    flex: 1,
   },
-  endDatePickerWrapper: {
-    marginLeft: 16,
-    marginRight: 16,
-    flexGrow: 1,
-    flexShrink: 1,
+  hourPickerWrapper: {
+    flex: 1,
   },
   dropdownBackdrop: {
     flex: 1,

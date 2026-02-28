@@ -1,4 +1,4 @@
-import logoImage from "@/assets/images/logo.png";
+import logoImage from "@/assets/images/logo-dociebie_white_new.png";
 import { Image, StyleSheet, Text, View } from "react-native";
 import FooterLinks from "./FooterLinks";
 import SocialIcons from "./SocialIcons";

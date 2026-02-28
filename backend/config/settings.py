@@ -43,11 +43,13 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.salons",
     "apps.appointments",
+    "apps.provider",
 ]
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -132,6 +134,11 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")
 CORS_ALLOW_ALL_ORIGINS = DEBUG  # allow all in dev for mobile emulators
 
+CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS", default=["https://dociebie.pl"])
+
+# Trust X-Forwarded-Proto header from nginx reverse proxy
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 # ---------------------------------------------------------------------------
 # Internationalisation
 # ---------------------------------------------------------------------------
@@ -145,6 +152,7 @@ USE_TZ = True
 # ---------------------------------------------------------------------------
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"

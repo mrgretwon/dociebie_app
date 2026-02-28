@@ -15,7 +15,7 @@ export const IMAGE_WIDTH = 40;
 const EmployeeInfoWithIcon = ({ employee, style }: EmployeeInfoProps) => {
   return (
     <View style={[styles.container, style]}>
-      <Image style={styles.image} contentFit="cover" source={portrait as any} />
+      <Image style={styles.image} contentFit="cover" source={employee.image || portrait} />
       <Text style={styles.nameText}>
         {employee.name}
       </Text>
@@ -25,8 +25,7 @@ const EmployeeInfoWithIcon = ({ employee, style }: EmployeeInfoProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
-    display: "flex",
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
   },

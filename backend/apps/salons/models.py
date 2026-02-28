@@ -5,7 +5,21 @@ from django.db import models
 class Category(models.Model):
     """Salon category (e.g. Barber, SPA, Nails)."""
 
+    ICON_CHOICES = [
+        ("scissors", "Nożyczki (fryzjer/barber)"),
+        ("sparkles", "Iskierki (kosmetyka/SPA)"),
+        ("leaf", "Liść (ogrodnictwo)"),
+        ("home", "Dom (sprzątanie)"),
+        ("wrench", "Klucz (naprawa)"),
+        ("truck", "Ciężarówka (przeprowadzka/kurier)"),
+        ("camera", "Kamera (filmowanie/foto)"),
+        ("heart", "Serce (zdrowie/wellness)"),
+        ("car", "Samochód (motoryzacja)"),
+        ("paw", "Łapka (zwierzęta)"),
+    ]
+
     name = models.CharField(max_length=100, unique=True)
+    icon = models.CharField(max_length=50, choices=ICON_CHOICES, blank=True, default="")
 
     class Meta:
         ordering = ["name"]
@@ -40,9 +54,19 @@ class Salon(models.Model):
     mail = models.EmailField(blank=True)
 
     main_image = models.ImageField(upload_to="salons/main/", blank=True)
-    services_image = models.ImageField(upload_to="salons/services/", blank=True)
-    reviews_image = models.ImageField(upload_to="salons/reviews/", blank=True)
-    details_image = models.ImageField(upload_to="salons/details/", blank=True)
+
+    # Subscription
+    subscription_active = models.BooleanField(default=False)
+    subscription_expiry = models.DateField(null=True, blank=True)
+
+    # Geolocation
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+
+    # Bank account
+    bank_name = models.CharField(max_length=100, blank=True)
+    bank_account_number = models.CharField(max_length=50, blank=True)
+    bank_holder_name = models.CharField(max_length=200, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -66,18 +90,31 @@ class Salon(models.Model):
 
 
 class OpeningHours(models.Model):
-    """A single opening-hours line, e.g. 'Pon-Pt od 9:00 do 17:00'."""
+    """Structured opening hours: one row per day with open/close times."""
+
+    DAY_CHOICES = [
+        (0, "Poniedziałek"),
+        (1, "Wtorek"),
+        (2, "Środa"),
+        (3, "Czwartek"),
+        (4, "Piątek"),
+        (5, "Sobota"),
+        (6, "Niedziela"),
+    ]
 
     salon = models.ForeignKey(Salon, on_delete=models.CASCADE, related_name="opening_hours")
-    text = models.CharField(max_length=255)
+    day_of_week = models.PositiveSmallIntegerField(choices=DAY_CHOICES)
+    open_time = models.TimeField()
+    close_time = models.TimeField()
     order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
-        ordering = ["order"]
+        ordering = ["day_of_week"]
         verbose_name_plural = "opening hours"
 
     def __str__(self) -> str:
-        return f"{self.salon.name} — {self.text}"
+        day_name = dict(self.DAY_CHOICES).get(self.day_of_week, "?")
+        return f"{self.salon.name} — {day_name} {self.open_time:%H:%M}–{self.close_time:%H:%M}"
 
 
 class Employee(models.Model):

@@ -4,14 +4,18 @@ from django.db import models
 
 class Appointment(models.Model):
     class Status(models.TextChoices):
-        PAID = "paid", "Oplacono"
-        UNPAID = "unpaid", "Nieoplacono"
+        PENDING = "pending", "Oczekuje"
+        CONFIRMED = "confirmed", "Potwierdzona"
+        PAID = "paid", "Opłacono"
+        UNPAID = "unpaid", "Nieopłacono"
         COMPLETED = "completed", "Zakończono"
         CANCELLED = "cancelled", "Anulowano"
 
     STATUS_DISPLAY = {
-        "paid": {"text": "Oplacono", "is_status_alright": True},
-        "unpaid": {"text": "Nieoplacono", "is_status_alright": False},
+        "pending": {"text": "Oczekuje", "is_status_alright": False},
+        "confirmed": {"text": "Potwierdzona", "is_status_alright": True},
+        "paid": {"text": "Opłacono", "is_status_alright": True},
+        "unpaid": {"text": "Nieopłacono", "is_status_alright": False},
         "completed": {"text": "Zakończono", "is_status_alright": True},
         "cancelled": {"text": "Anulowano", "is_status_alright": False},
     }
@@ -40,7 +44,7 @@ class Appointment(models.Model):
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
-        default=Status.UNPAID,
+        default=Status.PENDING,
     )
     created_at = models.DateTimeField(auto_now_add=True)
 

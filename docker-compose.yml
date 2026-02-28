@@ -13,7 +13,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-dociebie}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dociebie_secret}
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
   backend:
     build:
@@ -22,7 +22,6 @@ services:
     restart: unless-stopped
     entrypoint: /app/entrypoint.sh
     volumes:
-      - backend_static:/app/staticfiles
       - backend_media:/app/media
     env_file:
       - backend/.env
@@ -31,20 +30,6 @@ services:
     ports:
       - "8000:8000"
 
-  nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    volumes:
-      - backend_static:/app/staticfiles:ro
-      - backend_media:/app/media:ro
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
-
 volumes:
   postgres_data:
-  backend_static:
   backend_media:

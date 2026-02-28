@@ -9,21 +9,23 @@ import ClientAppointment from "./ClientAppointment";
 import HistoryInfo from "./HistoryInfo";
 
 export default function HistoryScreen() {
-  const { token } = useAuth();
+  const { token, logout } = useAuth();
   const [userAppointments, setUserAppointments] = useState<AppointmentModel[] | null>(null);
 
   useEffect(() => {
-    async function fetchAppointments(token: string) {
-      if (token) {
-        const appointments = await fetchClientAppointmentHistory(token);
+    async function fetchAppointments(accessToken: string) {
+      try {
+        const appointments = await fetchClientAppointmentHistory(accessToken);
         setUserAppointments(appointments);
+      } catch {
+        await logout();
       }
     }
 
     if (token) {
       fetchAppointments(token);
     }
-  }, [token]);
+  }, [token, logout]);
 
   if (!userAppointments) {
     return <Spinner />;

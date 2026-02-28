@@ -37,6 +37,8 @@ class ProviderSalonSerializer(serializers.ModelSerializer):
             "phone_number",
             "mail",
             "rating",
+            "latitude",
+            "longitude",
             "opening_hours",
             "employees",
             "main_image",

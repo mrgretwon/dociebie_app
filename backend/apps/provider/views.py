@@ -10,6 +10,7 @@ from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.response import Response
 
 from apps.appointments.models import Appointment
+from apps.salons.geocoding import geocode_address
 from apps.salons.models import Employee, OpeningHours, Salon, Service
 
 from .models import Client, ClientGroup, ClientGroupMembership
@@ -88,6 +89,17 @@ class ProviderSalonView(ProviderSalonMixin, views.APIView):
         serializer = ProviderSalonUpdateSerializer(salon, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        # Geocode if location was updated
+        if "location_name" in request.data:
+            try:
+                coords = geocode_address(salon.location_name)
+                if coords:
+                    salon.latitude, salon.longitude = coords
+                    salon.save(update_fields=["latitude", "longitude"])
+            except Exception:
+                pass  # Don't break the save if geocoding fails
+
         # Return full salon data
         return Response(
             ProviderSalonSerializer(salon, context={"request": request}).data
@@ -525,6 +537,11 @@ class ProviderAppointmentListCreateView(ProviderSalonMixin, views.APIView):
             "service", "employee", "user"
         )
 
+        # Filter by status
+        status_param = request.query_params.get("status")
+        if status_param:
+            appointments = appointments.filter(status=status_param)
+
         # Filter by specific date
         date_param = request.query_params.get("date")
         if date_param:
@@ -602,6 +619,19 @@ class ProviderAppointmentDetailView(ProviderSalonMixin, generics.RetrieveUpdateA
         return Appointment.objects.filter(salon=salon).select_related(
             "user", "service", "employee"
         )
+
+
+class ProviderPendingCountView(ProviderSalonMixin, views.APIView):
+    """GET /api/provider/appointments/pending-count/ — count of pending appointments."""
+
+    permission_classes = (IsProvider,)
+
+    def get(self, request):
+        salon = self.get_salon()
+        if not salon:
+            return Response({"detail": "No salon found."}, status=status.HTTP_404_NOT_FOUND)
+        count = Appointment.objects.filter(salon=salon, status="pending").count()
+        return Response({"count": count})
 
 
 class ProviderAvailableSlotsView(ProviderSalonMixin, views.APIView):
@@ -710,7 +740,7 @@ class ProviderFinancialSummaryView(ProviderSalonMixin, views.APIView):
             total=Sum("service__price")
         )["total"] or Decimal("0.00")
 
-        active_bookings = appointments.filter(status__in=["paid", "unpaid"])
+        active_bookings = appointments.filter(status__in=["paid", "unpaid", "pending", "confirmed"])
         bookings_revenue = active_bookings.aggregate(
             total=Sum("service__price")
         )["total"] or Decimal("0.00")

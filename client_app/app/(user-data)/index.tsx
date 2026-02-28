@@ -22,23 +22,36 @@ import { useRouter } from "expo-router";
 export default function UserDataScreen() {
   const router = useRouter();
   const translate = useTranslations();
-  const { user, token } = useAuth();
+  const { user, token, refreshProfile } = useAuth();
 
-  const [name, setName] = useState("Albert");
-  const [surname, setSurname] = useState("Kowalski");
+  const [name, setName] = useState(user?.name ?? "");
+  const [surname, setSurname] = useState(user?.surname ?? "");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [email, setEmail] = useState("akowalski@gmail.com");
+  const [email, setEmail] = useState(user?.email ?? "");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const updateUserProfile = async () => {
-    if (token) {
-      const changedData: ProfileUpdateDto = {
-        name: name === user?.name ? undefined : name,
-        surname: name === user?.surname ? undefined : surname,
-        email: name === user?.email ? undefined : email,
-        newPassword: password === "" && password !== passwordConfirm ? undefined : password,
-      };
-      await updateUserProfileData(changedData, token);
+    setErrorMessage(null);
+
+    if (password && password !== passwordConfirm) {
+      setErrorMessage(translate("PASSWORDS_DO_NOT_MATCH") ?? "Hasła nie są takie same.");
+      return;
+    }
+
+    if (!token) return;
+
+    const changedData: ProfileUpdateDto = {
+      name: name !== user?.name ? name : undefined,
+      surname: surname !== user?.surname ? surname : undefined,
+      email: email !== user?.email ? email : undefined,
+      newPassword: password || undefined,
+    };
+
+    const success = await updateUserProfileData(changedData, token);
+    if (success) {
+      await refreshProfile();
+      router.back();
     }
   };
 
@@ -93,6 +106,8 @@ export default function UserDataScreen() {
               style={styles.marginTopSpacing}
               secureTextEntry
             />
+
+            {errorMessage ? <Text style={styles.errorMessage}>{errorMessage}</Text> : null}
 
             <Button
               text={translate("SAVE")}
@@ -153,5 +168,9 @@ const styles = StyleSheet.create({
   },
   marginTopSpacing: {
     marginTop: 8,
+  },
+  errorMessage: {
+    color: "#b42318",
+    marginTop: 16,
   },
 });

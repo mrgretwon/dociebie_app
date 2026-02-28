@@ -1,5 +1,5 @@
-import logoCyanImage from "@/assets/images/logo-cyan.png";
-import logoImage from "@/assets/images/logo.png";
+import logoCyanImage from "@/assets/images/logo-dociebie.png";
+import logoImage from "@/assets/images/logo-dociebie_white_new.png";
 import { baseGrey, darkBlueFont, primaryColor } from "@/constants/style-vars";
 import { useRouter } from "expo-router";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";

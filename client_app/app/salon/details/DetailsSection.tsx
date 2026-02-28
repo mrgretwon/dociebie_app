@@ -19,9 +19,9 @@ const DetailsSection = ({ salon }: SalonProps) => {
         <Text style={styles.standardText}>{salon?.phoneNumber}</Text>
         {!!salon?.openingHours &&
           salon.openingHours.length > 0 &&
-          salon.openingHours.map((hoursInfo, i) => (
+          salon.openingHours.map((entry, i) => (
             <Text key={i} style={styles.greyedOutText}>
-              {hoursInfo}
+              {entry.display}
             </Text>
           ))}
       </DetailsSubsection>

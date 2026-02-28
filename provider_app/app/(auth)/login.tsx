@@ -11,6 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import logoCyanImage from "@/assets/images/logo-dociebie.png";
 import Button from "@/components/Button";
+import LoginRegisterBottomText from "@/components/LoginRegisterBottomText";
 import TextInputComponent from "@/components/TextInputComponent";
 import {
   baseGrey,
@@ -136,6 +137,14 @@ export default function LoginScreen() {
               label="Zaloguj przy użyciu Facebooka"
             />
             <SocialButton icon="apple" label="Zaloguj przez Apple" />
+          </View>
+
+          <View style={styles.bottomTextWrapper}>
+            <LoginRegisterBottomText
+              firstText="Nie masz jeszcze konta?"
+              secondText="Zarejestruj się"
+              onClick={() => router.navigate("/(auth)/register")}
+            />
           </View>
         </View>
       </ScrollView>
@@ -303,5 +312,8 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
     fontSize: smallFontSize,
     marginBottom: 12,
+  },
+  bottomTextWrapper: {
+    marginTop: 20,
   },
 });

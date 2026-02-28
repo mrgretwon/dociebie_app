@@ -40,7 +40,7 @@ const SalonReviewsScreen = () => {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        <ImageWithRoundedBottom />
+        <ImageWithRoundedBottom imageUri={salon.mainImage} />
 
         <Text style={styles.headerText}>{salon?.name}</Text>
 

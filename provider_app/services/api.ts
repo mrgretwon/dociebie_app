@@ -680,17 +680,39 @@ export async function removeClientFromGroup(
 
 export async function fetchProviderAppointments(
   token: string,
-  filters?: { date?: string; month?: number; year?: number }
+  filters?: { date?: string; month?: number; year?: number; status?: string }
 ): Promise<Record<string, unknown>[]> {
   const params: string[] = [];
   if (filters?.date) params.push(`date=${filters.date}`);
   if (filters?.month !== undefined) params.push(`month=${filters.month}`);
   if (filters?.year !== undefined) params.push(`year=${filters.year}`);
+  if (filters?.status) params.push(`status=${filters.status}`);
   const qs = params.length ? `?${params.join("&")}` : "";
   const data = await authenticatedRequest<
     Record<string, unknown>[] | { results: Record<string, unknown>[] }
   >(`${API_URL}/provider/appointments/${qs}`, token);
   return unwrapList(data);
+}
+
+export async function updateAppointmentStatus(
+  id: number,
+  appointmentStatus: string,
+  token: string
+): Promise<Record<string, unknown>> {
+  return authenticatedRequest<Record<string, unknown>>(
+    `${API_URL}/provider/appointments/${id}/`,
+    token,
+    { method: "PATCH", body: JSON.stringify({ status: appointmentStatus }) }
+  );
+}
+
+export async function fetchPendingCount(
+  token: string
+): Promise<{ count: number }> {
+  return authenticatedRequest<{ count: number }>(
+    `${API_URL}/provider/appointments/pending-count/`,
+    token
+  );
 }
 
 export async function createProviderAppointment(

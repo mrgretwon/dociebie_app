@@ -4,11 +4,6 @@ import { Feather } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-// import DateTimePickerProps from '../../../models/props/dateTimePickerProps'
-// import { Feather } from '@expo/vector-icons';
-// import { greyedOutFont } from '../../../globalStyles';
-// import styles from './DateTimePicker.style';
-// import { formatDateWithoutYear } from '../../../services/utils';
 
 interface DateTimePickerProps {
   isOpen: boolean;
@@ -18,12 +13,19 @@ interface DateTimePickerProps {
   mode: "date" | "time" | "datetime";
 }
 
+function formatDisplayText(date: Date, mode: string): string {
+  if (mode === "time") {
+    return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+  }
+  return formatDateWithoutYear(date);
+}
+
 const DateTimePicker = ({ isOpen, setIsOpen, date, setDate, mode }: DateTimePickerProps) => {
   return (
     <>
       <TouchableOpacity style={styles.dateTimeButton} onPress={() => setIsOpen(true)}>
-        <Feather name="mail" size={30} color={greyedOutFont} />
-        <Text style={styles.dateTimeText}>{formatDateWithoutYear(date)}</Text>
+        <Feather name={mode === "time" ? "clock" : "calendar"} size={20} color={greyedOutFont} />
+        <Text style={styles.dateTimeText}>{formatDisplayText(date, mode)}</Text>
       </TouchableOpacity>
 
       <DateTimePickerModal
@@ -52,7 +54,7 @@ const styles = StyleSheet.create({
     borderColor: greyFont,
     borderWidth: 1,
     borderRadius: 8,
-    paddingVertical: 8,
+    paddingVertical: 12,
     paddingHorizontal: 12,
   },
   dateTimeText: {

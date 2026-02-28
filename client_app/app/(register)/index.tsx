@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
-import logoCyanImage from "@/assets/images/logo-cyan.png";
+import logoCyanImage from "@/assets/images/logo-dociebie.png";
 import Button from "@/components/Button";
 import LoginRegisterBottomText from "@/components/LoginRegisterBottomText";
 import TextInHorizontalLine from "@/components/TextInHorizontalLine";
@@ -180,8 +180,8 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   logo: {
-    width: 200,
-    aspectRatio: 3,
+    width: 260,
+    aspectRatio: 1582 / 310,
     alignSelf: "center",
     marginBottom: 24,
   },

@@ -80,7 +80,15 @@ const ServicesSection = ({ salonId }: ServicesSectionProps) => {
       </View>
       {filteredServices.length > 0 &&
         filteredServices.map((service) => (
-          <TouchableOpacity key={service.id} onPress={() => router.push("/(appointment)")}>
+          <TouchableOpacity
+            key={service.id}
+            onPress={() =>
+              router.push({
+                pathname: "/(appointment)",
+                params: { salonId: String(salonId), serviceId: String(service.id) },
+              })
+            }
+          >
             <ServiceComponent service={service} />
           </TouchableOpacity>
         ))}

@@ -9,28 +9,35 @@ import { useSalonsSearch } from "@/contexts/SalonsSearchContext";
 import { SalonModel } from "@/models/data-models/salonModel";
 import { fetchAllSalons } from "@/services/api";
 import { useRouter } from "expo-router";
+import ListMapToggle from "./ListMapToggle";
+import SalonMapView from "@/components/SalonMapView";
 import SalonsSearchFilter from "./SalonsSearchFilter";
 
 export default function SalonsScreen() {
   const router = useRouter();
-  const { searchText, locationText, startDate, endDate, distance } = useSalonsSearch();
+  const { searchText, locationText, date, startHour, endHour, distance, userLatitude, userLongitude } = useSalonsSearch();
 
   const [salons, setSalons] = useState<SalonModel[] | null>(null);
+  const [viewMode, setViewMode] = useState<"lista" | "mapa">("lista");
 
   useEffect(() => {
     async function getAllSalons() {
       const fetchedSalons = await fetchAllSalons({
         searchText,
         locationText,
-        startDate,
-        endDate,
+        date,
+        startHour,
+        endHour,
         distance,
+        ...(userLatitude != null && userLongitude != null
+          ? { latitude: userLatitude, longitude: userLongitude }
+          : {}),
       });
       setSalons(fetchedSalons);
     }
 
     getAllSalons();
-  }, [searchText, locationText, startDate, endDate, distance]);
+  }, [searchText, locationText, date, startHour, endHour, distance, userLatitude, userLongitude]);
 
   const handleSalonClicked = (salon: SalonModel): void => {
     router.push({
@@ -44,25 +51,34 @@ export default function SalonsScreen() {
   }
 
   return (
-    <SafeAreaView edges={["top"]}>
+    <SafeAreaView edges={["top"]} style={styles.safeArea}>
       <View style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <SalonsSearchFilter />
-
-          <View style={styles.contentWrapper}>
-            <SalonList salons={salons} onClick={(salon) => handleSalonClicked(salon)} />
-          </View>
-        </ScrollView>
+        {viewMode === "lista" ? (
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <SalonsSearchFilter />
+            <ListMapToggle mode={viewMode} onModeChange={setViewMode} />
+            <View style={styles.contentWrapper}>
+              <SalonList salons={salons} onClick={(salon) => handleSalonClicked(salon)} />
+            </View>
+          </ScrollView>
+        ) : (
+          <>
+            <SalonsSearchFilter />
+            <ListMapToggle mode={viewMode} onModeChange={setViewMode} />
+            <SalonMapView salons={salons} onSalonPress={handleSalonClicked} />
+          </>
+        )}
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   container: {
-    width: "100%",
-    height: "100%",
-    display: "flex",
+    flex: 1,
     backgroundColor: baseGrey,
   },
   contentWrapper: {

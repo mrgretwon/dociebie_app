@@ -10,4 +10,5 @@ urlpatterns = [
     path("salons/<int:pk>/", views.SalonDetailView.as_view(), name="salon-detail"),
     path("salons/<int:pk>/services/", views.SalonServicesView.as_view(), name="salon-services"),
     path("salons/<int:pk>/reviews/", views.SalonReviewsView.as_view(), name="salon-reviews"),
+    path("salons/<int:pk>/available-slots/", views.SalonAvailableSlotsView.as_view(), name="salon-available-slots"),
 ]

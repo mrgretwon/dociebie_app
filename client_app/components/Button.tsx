@@ -6,11 +6,16 @@ interface ButtonProps {
   onClick: () => void;
   style?: object;
   textStyle?: object;
+  disabled?: boolean;
 }
 
-const Button = ({ text, onClick, style, textStyle }: ButtonProps) => {
+const Button = ({ text, onClick, style, textStyle, disabled }: ButtonProps) => {
   return (
-    <TouchableOpacity onPress={onClick} style={[styles.button, style]}>
+    <TouchableOpacity
+      onPress={onClick}
+      style={[styles.button, style, disabled && { opacity: 0.5 }]}
+      disabled={disabled}
+    >
       <Text style={[styles.buttonText, textStyle]}>{text}</Text>
     </TouchableOpacity>
   );
@@ -22,7 +27,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     backgroundColor: primaryColor,
     borderWidth: 1,
-    borderColor: "#475467",
+    borderColor: primaryColor,
   },
   buttonText: {
     width: "100%",

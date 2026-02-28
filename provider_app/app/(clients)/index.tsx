@@ -128,7 +128,7 @@ export default function ClientListScreen() {
               if (showFullList) {
                 setShowFullList(false);
               } else {
-                router.back();
+                router.navigate("/(dashboard)");
               }
             }}
           >

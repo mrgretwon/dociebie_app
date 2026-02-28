@@ -27,7 +27,7 @@ import {
 } from "@/constants/style-vars";
 import { Fonts } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchFinancialSummary } from "@/services/api";
+import { fetchFinancialSummary, fetchPendingCount } from "@/services/api";
 import Svg, { Path } from "react-native-svg";
 import { Toast } from "toastify-react-native";
 import FacebookIconSvg from "@/assets/svg/facebook-icon-svg";
@@ -39,6 +39,7 @@ export default function DashboardScreen() {
   const { user, token, logout } = useAuth();
   const [financialData, setFinancialData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pendingCount, setPendingCount] = useState(0);
 
   const displayName = user
     ? `${user.name} ${user.surname}`
@@ -49,8 +50,12 @@ export default function DashboardScreen() {
     const loadData = async () => {
       if (!token) { setLoading(false); return; }
       try {
-        const summary = await fetchFinancialSummary(token);
+        const [summary, pending] = await Promise.all([
+          fetchFinancialSummary(token),
+          fetchPendingCount(token),
+        ]);
         setFinancialData(summary);
+        setPendingCount(pending.count);
       } catch {
         Toast.error("Nie udało się pobrać danych finansowych");
       } finally {
@@ -135,6 +140,11 @@ export default function DashboardScreen() {
           <Text style={styles.sectionTitle}>Panel usługodawcy</Text>
           <HorizontalLine style={styles.sectionLine} />
           <MenuRow
+            label="Do potwierdzenia"
+            badge={pendingCount}
+            onPress={() => router.push("/(clients)/pending")}
+          />
+          <MenuRow
             label="Kalendarz rezerwacji"
             onPress={() => router.push("/(calendar)")}
           />
@@ -191,14 +201,23 @@ export default function DashboardScreen() {
 
 function MenuRow({
   label,
+  badge,
   onPress,
 }: {
   label: string;
+  badge?: number;
   onPress: () => void;
 }) {
   return (
     <TouchableOpacity style={styles.menuRow} onPress={onPress}>
-      <Text style={styles.menuRowText}>{label}</Text>
+      <View style={styles.menuRowLeft}>
+        <Text style={styles.menuRowText}>{label}</Text>
+        {badge != null && badge > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{badge}</Text>
+          </View>
+        )}
+      </View>
       <Svg width={8} height={14} viewBox="0 0 8 14" fill="none">
         <Path
           d="M1 1L7 7L1 13"
@@ -351,10 +370,29 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: baseGrey,
   },
+  menuRowLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   menuRowText: {
     fontSize: standardFontSize,
     fontFamily: Fonts.regular,
     color: blackFont,
+  },
+  badge: {
+    backgroundColor: "#E53935",
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 6,
+  },
+  badgeText: {
+    color: "white",
+    fontSize: 11,
+    fontFamily: Fonts.bold,
   },
   footer: {
     backgroundColor: primaryColor,

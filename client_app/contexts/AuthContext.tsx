@@ -12,6 +12,31 @@ import {
 } from "@/services/api";
 import * as SecureStore from "expo-secure-store";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { Platform } from "react-native";
+
+// expo-secure-store doesn't support web — fall back to localStorage
+const storage = {
+  getItemAsync: async (key: string): Promise<string | null> => {
+    if (Platform.OS === "web") {
+      return localStorage.getItem(key);
+    }
+    return SecureStore.getItemAsync(key);
+  },
+  setItemAsync: async (key: string, value: string): Promise<void> => {
+    if (Platform.OS === "web") {
+      localStorage.setItem(key, value);
+      return;
+    }
+    return SecureStore.setItemAsync(key, value);
+  },
+  deleteItemAsync: async (key: string): Promise<void> => {
+    if (Platform.OS === "web") {
+      localStorage.removeItem(key);
+      return;
+    }
+    return SecureStore.deleteItemAsync(key);
+  },
+};
 
 type AuthOptions = {
   persist?: boolean;
@@ -46,8 +71,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
     setUser(null);
     refreshTokenRef.current = null;
-    await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-    await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+    await storage.deleteItemAsync(ACCESS_TOKEN_KEY);
+    await storage.deleteItemAsync(REFRESH_TOKEN_KEY);
   }, []);
 
   const applyAuthResponse = useCallback(
@@ -57,11 +82,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       refreshTokenRef.current = auth.refresh;
 
       if (persistTokens) {
-        await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, auth.access);
-        await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, auth.refresh);
+        await storage.setItemAsync(ACCESS_TOKEN_KEY, auth.access);
+        await storage.setItemAsync(REFRESH_TOKEN_KEY, auth.refresh);
       } else {
-        await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-        await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+        await storage.deleteItemAsync(ACCESS_TOKEN_KEY);
+        await storage.deleteItemAsync(REFRESH_TOKEN_KEY);
       }
     },
     []
@@ -69,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const tryRefreshToken = useCallback(async (): Promise<string | null> => {
     const storedRefresh =
-      refreshTokenRef.current ?? (await SecureStore.getItemAsync(REFRESH_TOKEN_KEY));
+      refreshTokenRef.current ?? (await storage.getItemAsync(REFRESH_TOKEN_KEY));
 
     if (!storedRefresh) return null;
 
@@ -77,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { access } = await refreshTokenRequest(storedRefresh);
       setToken(access);
       refreshTokenRef.current = storedRefresh;
-      await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, access);
+      await storage.setItemAsync(ACCESS_TOKEN_KEY, access);
       return access;
     } catch {
       await clearAuth();
@@ -144,7 +169,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const hydrateFromStorage = async () => {
       try {
-        const storedRefresh = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+        const storedRefresh = await storage.getItemAsync(REFRESH_TOKEN_KEY);
 
         if (!storedRefresh) {
           // No refresh token — clean start
@@ -155,7 +180,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         refreshTokenRef.current = storedRefresh;
 
         // Try stored access token first
-        const storedAccess = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+        const storedAccess = await storage.getItemAsync(ACCESS_TOKEN_KEY);
 
         if (storedAccess) {
           try {

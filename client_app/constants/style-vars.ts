@@ -1,4 +1,4 @@
-export const primaryColor = "#FFA810";
+export const primaryColor = "#002B8A";
 export const baseGrey = "#F4F6F8";
 
 export const greyedOutFont = "#667085";
