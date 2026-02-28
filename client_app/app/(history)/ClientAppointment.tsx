@@ -12,7 +12,6 @@ import {
 } from "@/constants/style-vars";
 import { useTranslations } from "@/hooks/use-translations";
 import AppointmentModel from "@/models/data-models/appointmentModel";
-import { formatDateTimeWithoutYear } from "@/services/utils";
 import { useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -26,10 +25,10 @@ const ClientAppointment = ({ appointment }: AppointmentProps) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.dateText}>{formatDateTimeWithoutYear(appointment.date)}</Text>
+      <Text style={styles.dateText}>{appointment.date}</Text>
       <View style={styles.headerContainer}>
         <Text style={styles.headerText}>
-          {appointment.worker.name} - {appointment.service.name}
+          {appointment.employeeName} - {appointment.serviceName}
         </Text>
         <Text
           style={
@@ -41,8 +40,7 @@ const ClientAppointment = ({ appointment }: AppointmentProps) => {
           {appointment.status.text}
         </Text>
       </View>
-      <Text style={styles.infoText}>{appointment.salon.name}</Text>
-      <Text style={styles.infoText}>{appointment.salon.address}</Text>
+      <Text style={styles.infoText}>{appointment.salonName}</Text>
       <Button
         onClick={() => router.push("/(appointment)")}
         style={{ marginTop: 32 }}

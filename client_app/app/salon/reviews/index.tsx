@@ -1,8 +1,9 @@
 import Spinner from "@/components/Spinner";
 import { blackFont, largeFontSize } from "@/constants/style-vars";
+import { OpinionModel } from "@/models/data-models/opinionModel";
 import { SalonModel } from "@/models/data-models/salonModel";
 import SalonNavbarElementType from "@/models/enums/salonNavbarElementType";
-import { fetchSalon } from "@/services/api";
+import { fetchSalon, fetchSalonReviews } from "@/services/api";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -13,11 +14,15 @@ import ReviewListComponent from "./ReviewListComponent";
 const SalonReviewsScreen = () => {
   const { salonId } = useLocalSearchParams<{ salonId?: string }>();
   const [salon, setSalon] = useState<SalonModel | null>(null);
+  const [reviews, setReviews] = useState<OpinionModel[] | null>(null);
 
   useEffect(() => {
-    async function getSalonData(salonId: number) {
-      const salonResponse = await fetchSalon(salonId);
+    async function getSalonData(id: number) {
+      const salonResponse = await fetchSalon(id);
       setSalon(salonResponse);
+
+      const reviewsResponse = await fetchSalonReviews(id);
+      setReviews(reviewsResponse);
     }
 
     if (salonId) {
@@ -29,7 +34,7 @@ const SalonReviewsScreen = () => {
     return null;
   }
 
-  if (!salon) {
+  if (!salon || reviews === null) {
     return <Spinner />;
   }
   return (
@@ -45,7 +50,7 @@ const SalonReviewsScreen = () => {
         />
 
         <View style={styles.reviewsWrapper}>
-          <ReviewListComponent reviews={salon?.opinions ?? []} />
+          <ReviewListComponent reviews={reviews} />
         </View>
       </ScrollView>
     </View>

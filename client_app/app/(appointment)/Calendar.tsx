@@ -1,4 +1,4 @@
-import { daysShortNames, monthNames } from "@/constants/dummy-data";
+import { daysShortNames, monthNames } from "@/constants/constants";
 import {
   darkGreyFont,
   greyedOutFont,
