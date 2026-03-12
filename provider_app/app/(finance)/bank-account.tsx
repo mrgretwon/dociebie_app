@@ -1,6 +1,8 @@
 import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useEffect, useState } from "react";
 import {
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -105,7 +107,11 @@ export default function BankAccountScreen() {
     return (
       <View style={styles.root}>
         <Header />
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={{ flex: 1 }}
+        >
+        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <View style={styles.content}>
             <Text style={styles.title}>
               Przypisywanie rachunku do usługi
@@ -149,6 +155,7 @@ export default function BankAccountScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
+        </KeyboardAvoidingView>
       </View>
     );
   }
@@ -156,7 +163,11 @@ export default function BankAccountScreen() {
   return (
     <View style={styles.root}>
       <Header />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}
+      >
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
           <Text style={styles.sectionTitle}>Aktualny rachunek bankowy</Text>
           <Text style={styles.infoText}>Nazwa banku: {currentBankName || "Brak"}</Text>
@@ -212,6 +223,7 @@ export default function BankAccountScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }

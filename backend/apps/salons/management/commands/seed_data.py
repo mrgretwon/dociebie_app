@@ -11,7 +11,7 @@ from django.utils import timezone
 
 from apps.appointments.models import Appointment
 from apps.provider.models import Client, ClientGroup, ClientGroupMembership
-from apps.salons.models import Category, Employee, OpeningHours, Review, Salon, Service
+from apps.salons.models import Category, Employee, OpeningHours, Review, Salon, Service, SubCategory
 
 User = get_user_model()
 
@@ -440,17 +440,83 @@ class Command(BaseCommand):
             )
             categories[cat_name] = cat
 
+        # --- Subcategories ---
+        subcategory_defs = {
+            "Barber": [
+                "Strzyżenie męskie",
+                "Strzyżenie brody",
+                "Golenie brzytwą",
+                "Stylizacja włosów",
+            ],
+            "SPA": [
+                "Masaż relaksacyjny",
+                "Masaż leczniczy",
+                "Rytuały ciała",
+                "Aromaterapia",
+                "Refleksologia",
+            ],
+            "Beauty": [
+                "Manicure i pedicure",
+                "Makijaż",
+                "Stylizacja rzęs i brwi",
+                "Pielęgnacja twarzy",
+                "Depilacja",
+            ],
+            "Sprzątanie": [
+                "Sprzątanie mieszkań",
+                "Sprzątanie biur",
+                "Mycie okien",
+                "Pranie tapicerki",
+                "Sprzątanie po remoncie",
+            ],
+            "Hydraulika": [
+                "Naprawy hydrauliczne",
+                "Montaż instalacji",
+                "Usuwanie awarii",
+                "Ogrzewanie podłogowe",
+            ],
+            "Mechanik": [
+                "Serwis ogólny",
+                "Diagnostyka",
+                "Wymiana opon",
+                "Klimatyzacja",
+                "Blacharstwo i lakiernictwo",
+            ],
+            "Foto": [
+                "Sesje portretowe",
+                "Fotografia ślubna",
+                "Fotografia produktowa",
+                "Reportaż",
+                "Sesje biznesowe",
+            ],
+        }
+        subcategories: dict[str, list] = {}
+        for cat_name, subcat_names in subcategory_defs.items():
+            cat = categories.get(cat_name)
+            if not cat:
+                continue
+            subcategories[cat_name] = []
+            for subcat_name in subcat_names:
+                subcat, _ = SubCategory.objects.get_or_create(
+                    name=subcat_name,
+                    category=cat,
+                )
+                subcategories[cat_name].append(subcat)
+
         # --- 10 Salons ---
         salons = []
         for i, data in enumerate(SALONS_DATA):
             cat = categories.get(data["category"])
             owner = providers[i]
+            cat_subcats = subcategories.get(data["category"], [])
+            subcat = random.choice(cat_subcats) if cat_subcats else None
 
             salon, created = Salon.objects.get_or_create(
                 name=data["name"],
                 defaults={
                     "owner": owner,
                     "category": cat,
+                    "subcategory": subcat,
                     "location_name": f"{data['street']}, {data['city']}",
                     "phone_number": data["phone"],
                     "mail": data["mail"],
@@ -459,7 +525,13 @@ class Command(BaseCommand):
             salons.append(salon)
 
             if not created:
-                self.stdout.write(f"  Salon already exists: {salon.name}")
+                # Update subcategory for existing salons that don't have one
+                if not salon.subcategory and subcat:
+                    salon.subcategory = subcat
+                    salon.save(update_fields=["subcategory"])
+                    self.stdout.write(f"  Updated subcategory for: {salon.name}")
+                else:
+                    self.stdout.write(f"  Salon already exists: {salon.name}")
                 continue
 
             self.stdout.write(self.style.SUCCESS(f"  Created salon: {salon.name}"))

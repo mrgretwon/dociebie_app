@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Button from "@/components/Button";
@@ -56,12 +63,16 @@ export default function UserDataScreen() {
   };
 
   return (
-    <SafeAreaView edges={["top"]}>
-      <View style={styles.container}>
+    <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.container}
+      >
         <ScrollView
           style={styles.scrollContainer}
           contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
           <AntDesign name="close" size={32} color="black" onPress={() => router.back()} />
 
@@ -122,7 +133,7 @@ export default function UserDataScreen() {
             />
           </View>
         </ScrollView>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

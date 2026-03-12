@@ -13,6 +13,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { Fonts } from "@/constants/theme";
 import { primaryColor } from "@/constants/style-vars";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -27,6 +28,7 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
       <ToastManager position="bottom" />
       <AuthProvider>
         <Drawer
@@ -81,6 +83,7 @@ export default function RootLayout() {
         </Drawer>
         <StatusBar style="auto" />
       </AuthProvider>
+      </SafeAreaView>
     </GestureHandlerRootView>
   );
 }

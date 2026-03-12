@@ -1,4 +1,4 @@
-import { greyedOutFont, greyFont } from "@/constants/style-vars";
+import { greyedOutFont, lightGrey } from "@/constants/style-vars";
 import { formatDateWithoutYear } from "@/services/utils";
 import { Feather } from "@expo/vector-icons";
 import React from "react";
@@ -51,10 +51,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "white",
-    borderColor: greyFont,
+    borderColor: lightGrey,
     borderWidth: 1,
     borderRadius: 8,
-    paddingVertical: 12,
+    height: 48,
     paddingHorizontal: 12,
   },
   dateTimeText: {

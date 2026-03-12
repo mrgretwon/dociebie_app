@@ -1,6 +1,8 @@
 import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useEffect, useState } from "react";
 import {
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -133,7 +135,11 @@ export default function FreeSlotScreen() {
   return (
     <View style={styles.root}>
       <Header />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}
+      >
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
           <Text style={styles.title}>Dodaj wizytę</Text>
           <Text style={styles.subtitle}>
@@ -312,6 +318,7 @@ export default function FreeSlotScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }

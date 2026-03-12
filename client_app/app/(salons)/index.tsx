@@ -15,7 +15,7 @@ import SalonsSearchFilter from "./SalonsSearchFilter";
 
 export default function SalonsScreen() {
   const router = useRouter();
-  const { searchText, locationText, date, startHour, endHour, distance, userLatitude, userLongitude } = useSalonsSearch();
+  const { searchText, locationText, date, startHour, endHour, distance, userLatitude, userLongitude, subcategoryId } = useSalonsSearch();
 
   const [salons, setSalons] = useState<SalonModel[] | null>(null);
   const [viewMode, setViewMode] = useState<"lista" | "mapa">("lista");
@@ -32,12 +32,13 @@ export default function SalonsScreen() {
         ...(userLatitude != null && userLongitude != null
           ? { latitude: userLatitude, longitude: userLongitude }
           : {}),
+        subcategoryId,
       });
       setSalons(fetchedSalons);
     }
 
     getAllSalons();
-  }, [searchText, locationText, date, startHour, endHour, distance, userLatitude, userLongitude]);
+  }, [searchText, locationText, date, startHour, endHour, distance, userLatitude, userLongitude, subcategoryId]);
 
   const handleSalonClicked = (salon: SalonModel): void => {
     router.push({

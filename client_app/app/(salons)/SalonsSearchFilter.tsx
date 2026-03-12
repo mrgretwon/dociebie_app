@@ -1,14 +1,18 @@
 import DateTimePicker from "@/components/DateTimePicker";
 import TextInputComponent from "@/components/TextInputComponent";
 import { distanceDropdownValues, maxDistance } from "@/constants/constants";
-import { blackFont, greyFont } from "@/constants/style-vars";
+import { blackFont, greyFont, lightGrey, primaryColor } from "@/constants/style-vars";
+import { Fonts } from "@/constants/theme";
+import { useCategories } from "@/contexts/CategoriesContext";
 import { useSalonsSearch } from "@/contexts/SalonsSearchContext";
+import { useTranslations } from "@/hooks/use-translations";
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -18,6 +22,8 @@ import {
 
 const SalonsSearchFilter = () => {
   const router = useRouter();
+  const translate = useTranslations();
+  const { categories } = useCategories();
   const {
     searchText,
     setSearchText,
@@ -33,12 +39,21 @@ const SalonsSearchFilter = () => {
     setDistance,
     setUserLatitude,
     setUserLongitude,
+    categoryId,
+    setCategoryId,
+    subcategoryId,
+    setSubcategoryId,
   } = useSalonsSearch();
 
   const [isDatePickerOpened, setIsDatePickerOpened] = useState(false);
   const [isStartHourPickerOpened, setIsStartHourPickerOpened] = useState(false);
   const [isEndHourPickerOpened, setIsEndHourPickerOpened] = useState(false);
   const [isDistanceDropdownOpen, setIsDistanceDropdownOpen] = useState(false);
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  const [isSubcategoryDropdownOpen, setIsSubcategoryDropdownOpen] = useState(false);
+
+  const selectedCategory = categories.find((c) => c.id === categoryId) ?? null;
+  const selectedSubcategory = selectedCategory?.subcategories.find((s) => s.id === subcategoryId) ?? null;
 
   const geocodeLocation = async (text: string) => {
     if (!text.trim()) {
@@ -80,6 +95,26 @@ const SalonsSearchFilter = () => {
         setText={setSearchText}
         style={styles.searchTextContainer}
       />
+
+      <Pressable
+        style={styles.selectButton}
+        onPress={() => setIsCategoryDropdownOpen(true)}
+      >
+        <Text style={[styles.selectButtonText, !selectedCategory && styles.selectButtonPlaceholder]}>
+          {selectedCategory ? selectedCategory.name : translate("SELECT_CATEGORY")}
+        </Text>
+        <AntDesign name="down" size={14} color={greyFont} />
+      </Pressable>
+
+      <Pressable
+        style={[styles.selectButton, !selectedCategory && styles.selectButtonDisabled]}
+        onPress={() => selectedCategory && setIsSubcategoryDropdownOpen(true)}
+      >
+        <Text style={[styles.selectButtonText, !selectedSubcategory && styles.selectButtonPlaceholder]}>
+          {selectedSubcategory ? selectedSubcategory.name : translate("SELECT_SUBCATEGORY")}
+        </Text>
+        <AntDesign name="down" size={14} color={greyFont} />
+      </Pressable>
 
       <View style={styles.locationContainer}>
         <Pressable style={styles.dropdownButton} onPress={() => setIsDistanceDropdownOpen(true)}>
@@ -164,6 +199,90 @@ const SalonsSearchFilter = () => {
           </View>
         </TouchableOpacity>
       </Modal>
+
+      <Modal
+        transparent
+        visible={isCategoryDropdownOpen}
+        animationType="fade"
+        onRequestClose={() => setIsCategoryDropdownOpen(false)}
+      >
+        <TouchableOpacity
+          style={styles.dropdownBackdrop}
+          activeOpacity={1}
+          onPressOut={() => setIsCategoryDropdownOpen(false)}
+        >
+          <View style={styles.dropdownSheet}>
+            <ScrollView>
+              <TouchableOpacity
+                style={styles.dropdownItem}
+                onPress={() => {
+                  setCategoryId(null);
+                  setSubcategoryId(null);
+                  setIsCategoryDropdownOpen(false);
+                }}
+              >
+                <Text style={[styles.dropdownItemText, styles.dropdownClearText]}>{translate("CLEAR_SELECTION")}</Text>
+              </TouchableOpacity>
+              {categories.map((cat) => (
+                <TouchableOpacity
+                  key={cat.id}
+                  style={[styles.dropdownItem, cat.id === categoryId && styles.dropdownItemSelected]}
+                  onPress={() => {
+                    setCategoryId(cat.id);
+                    setSubcategoryId(null);
+                    setIsCategoryDropdownOpen(false);
+                  }}
+                >
+                  <Text style={[styles.dropdownItemText, cat.id === categoryId && styles.dropdownItemTextSelected]}>
+                    {cat.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      <Modal
+        transparent
+        visible={isSubcategoryDropdownOpen}
+        animationType="fade"
+        onRequestClose={() => setIsSubcategoryDropdownOpen(false)}
+      >
+        <TouchableOpacity
+          style={styles.dropdownBackdrop}
+          activeOpacity={1}
+          onPressOut={() => setIsSubcategoryDropdownOpen(false)}
+        >
+          <View style={styles.dropdownSheet}>
+            <ScrollView>
+              <TouchableOpacity
+                style={styles.dropdownItem}
+                onPress={() => {
+                  setSubcategoryId(null);
+                  setIsSubcategoryDropdownOpen(false);
+                }}
+              >
+                <Text style={[styles.dropdownItemText, styles.dropdownClearText]}>{translate("CLEAR_SELECTION")}</Text>
+              </TouchableOpacity>
+              {selectedCategory?.subcategories.map((sub) => (
+                <TouchableOpacity
+                  key={sub.id}
+                  style={[styles.dropdownItem, sub.id === subcategoryId && styles.dropdownItemSelected]}
+                  onPress={() => {
+                    setSubcategoryId(sub.id);
+                    setIsSubcategoryDropdownOpen(false);
+                  }}
+                >
+                  <Text style={[styles.dropdownItemText, sub.id === subcategoryId && styles.dropdownItemTextSelected]}>
+                    {sub.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
@@ -198,6 +317,7 @@ const styles = StyleSheet.create({
   searchTextContainer: {
     marginTop: 16,
     marginBottom: 8,
+    borderColor: lightGrey,
   },
   locationContainer: {
     width: "100%",
@@ -206,14 +326,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     backgroundColor: "white",
-    borderColor: greyFont,
+    borderColor: lightGrey,
+    height: 48,
   },
   locationDistance: {
     color: blackFont,
     textAlign: "center",
     textAlignVertical: "center",
     width: 75,
-    paddingVertical: 12,
   },
   dropdownButton: {
     justifyContent: "center",
@@ -221,9 +341,8 @@ const styles = StyleSheet.create({
   locationText: {
     color: blackFont,
     flexGrow: 1,
-    borderLeftColor: greyFont,
+    borderLeftColor: lightGrey,
     borderLeftWidth: 1,
-    paddingVertical: 12,
     paddingHorizontal: 16,
   },
   dateAndHoursRow: {
@@ -262,6 +381,40 @@ const styles = StyleSheet.create({
   },
   dropdownItemText: {
     color: blackFont,
+  },
+  dropdownItemSelected: {
+    backgroundColor: "#EEF2FF",
+  },
+  dropdownItemTextSelected: {
+    color: primaryColor,
+    fontFamily: Fonts.semiBold,
+  },
+  dropdownClearText: {
+    color: greyFont,
+    fontSize: 13,
+  },
+  selectButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderWidth: 1,
+    borderColor: lightGrey,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    height: 48,
+    marginBottom: 8,
+    backgroundColor: "white",
+  },
+  selectButtonDisabled: {
+    backgroundColor: "#F9FAFB",
+  },
+  selectButtonText: {
+    color: blackFont,
+    fontSize: 14,
+    fontFamily: Fonts.regular,
+  },
+  selectButtonPlaceholder: {
+    color: greyFont,
   },
 });
 

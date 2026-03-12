@@ -33,18 +33,25 @@ class SalonListView(generics.ListAPIView):
     permission_classes = (permissions.AllowAny,)
 
     def get_queryset(self):
-        qs = Salon.objects.select_related("category").prefetch_related(
+        qs = Salon.objects.select_related("category", "subcategory").prefetch_related(
             "opening_hours", "employees", "reviews"
         ).annotate(avg_rating=Avg("reviews__rating"))
 
         search = self.request.query_params.get("search")
         location = self.request.query_params.get("location")
+        subcategory_id = self.request.query_params.get("subcategory_id")
         start_date = self.request.query_params.get("start_date")
         start_hour = self.request.query_params.get("start_hour")
         end_hour = self.request.query_params.get("end_hour")
         lat = self.request.query_params.get("lat")
         lng = self.request.query_params.get("lng")
         distance_km = self.request.query_params.get("distance")
+
+        if subcategory_id:
+            try:
+                qs = qs.filter(subcategory_id=int(subcategory_id))
+            except ValueError:
+                pass
 
         if search:
             qs = qs.filter(
@@ -108,7 +115,7 @@ class SalonDetailView(generics.RetrieveAPIView):
     permission_classes = (permissions.AllowAny,)
 
     def get_queryset(self):
-        return Salon.objects.select_related("category").prefetch_related(
+        return Salon.objects.select_related("category", "subcategory").prefetch_related(
             "opening_hours", "employees", "reviews"
         ).annotate(avg_rating=Avg("reviews__rating"))
 

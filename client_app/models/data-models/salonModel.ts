@@ -33,6 +33,7 @@ export interface SalonsSearchRequestParams {
   distance: number;
   latitude?: number;
   longitude?: number;
+  subcategoryId?: number | null;
 }
 
 export interface SalonModelResponseDto {

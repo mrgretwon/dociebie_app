@@ -24,6 +24,10 @@ type SalonsSearchContextValue = {
   setUserLatitude: Dispatch<SetStateAction<number | null>>;
   userLongitude: number | null;
   setUserLongitude: Dispatch<SetStateAction<number | null>>;
+  categoryId: number | null;
+  setCategoryId: Dispatch<SetStateAction<number | null>>;
+  subcategoryId: number | null;
+  setSubcategoryId: Dispatch<SetStateAction<number | null>>;
 };
 
 const SalonsSearchContext = createContext<SalonsSearchContextValue | undefined>(undefined);
@@ -37,6 +41,8 @@ export const SalonsSearchProvider = ({ children }: { children: React.ReactNode }
   const [distance, setDistance] = useState(5);
   const [userLatitude, setUserLatitude] = useState<number | null>(null);
   const [userLongitude, setUserLongitude] = useState<number | null>(null);
+  const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [subcategoryId, setSubcategoryId] = useState<number | null>(null);
 
   const value = useMemo(
     () => ({
@@ -56,8 +62,12 @@ export const SalonsSearchProvider = ({ children }: { children: React.ReactNode }
       setUserLatitude,
       userLongitude,
       setUserLongitude,
+      categoryId,
+      setCategoryId,
+      subcategoryId,
+      setSubcategoryId,
     }),
-    [searchText, locationText, date, startHour, endHour, distance, userLatitude, userLongitude]
+    [searchText, locationText, date, startHour, endHour, distance, userLatitude, userLongitude, categoryId, subcategoryId]
   );
 
   return <SalonsSearchContext.Provider value={value}>{children}</SalonsSearchContext.Provider>;

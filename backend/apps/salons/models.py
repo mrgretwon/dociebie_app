@@ -29,6 +29,24 @@ class Category(models.Model):
         return self.name
 
 
+class SubCategory(models.Model):
+    """Subcategory within a salon category."""
+
+    name = models.CharField(max_length=100)
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.CASCADE,
+        related_name="subcategories",
+    )
+
+    class Meta:
+        ordering = ["name"]
+        unique_together = ("name", "category")
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class Salon(models.Model):
     """A salon owned by a provider user."""
 
@@ -40,6 +58,13 @@ class Salon(models.Model):
     )
     category = models.ForeignKey(
         Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="salons",
+    )
+    subcategory = models.ForeignKey(
+        SubCategory,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

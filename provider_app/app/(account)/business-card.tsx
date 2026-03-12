@@ -1,6 +1,6 @@
 import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useEffect, useState } from "react";
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 
@@ -141,7 +141,11 @@ export default function BusinessCardScreen() {
   return (
     <View style={styles.root}>
       <Header />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}
+      >
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
           <Text style={styles.title}>Twoja wizytówka</Text>
           <Text style={styles.subtitle}>
@@ -365,6 +369,7 @@ export default function BusinessCardScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }

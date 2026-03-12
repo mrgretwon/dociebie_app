@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Employee, OpeningHours, Review, Salon, Service
+from .models import Category, Employee, OpeningHours, Review, Salon, Service, SubCategory
 
 
 class OpeningHoursInline(admin.TabularInline):
@@ -24,16 +24,29 @@ class ReviewInline(admin.TabularInline):
     extra = 0
 
 
+class SubCategoryInline(admin.TabularInline):
+    model = SubCategory
+    extra = 1
+
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "icon")
+    search_fields = ("name",)
+    inlines = [SubCategoryInline]
+
+
+@admin.register(SubCategory)
+class SubCategoryAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "category")
+    list_filter = ("category",)
     search_fields = ("name",)
 
 
 @admin.register(Salon)
 class SalonAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "category", "owner", "location_name")
-    list_filter = ("category",)
+    list_display = ("id", "name", "category", "subcategory", "owner", "location_name")
+    list_filter = ("category", "subcategory")
     search_fields = ("name", "location_name")
     inlines = [OpeningHoursInline, EmployeeInline, ServiceInline, ReviewInline]
 

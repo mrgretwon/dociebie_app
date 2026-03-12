@@ -78,6 +78,13 @@
     "PAYMENT_SAMPLE_NAME": "Albert Kowalski",
     "PAYMENT_SAMPLE_CARD_NUMBER": "1234 1234 1234 1234",
     "PAYMENT_SAMPLE_CVV": "•••",
-    "PAYMENT_SAMPLE_EXPIRY": "06 / 2024"
+    "PAYMENT_SAMPLE_EXPIRY": "06 / 2024",
+    "SELECT_SUBCATEGORY": "Wybierz podkategorię",
+    "SUBCATEGORIES": "Podkategorie",
+    "SELECT_CATEGORY": "Wybierz kategorię",
+    "CATEGORY": "Kategoria",
+    "SUBCATEGORY": "Podkategoria",
+    "NO_SUBCATEGORIES": "Brak podkategorii",
+    "CLEAR_SELECTION": "Wyczyść wybór"
   }
 }

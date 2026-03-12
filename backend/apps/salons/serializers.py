@@ -1,14 +1,21 @@
 from rest_framework import serializers
 
-from .models import Category, Employee, OpeningHours, Review, Salon, Service
+from .models import Category, Employee, OpeningHours, Review, Salon, Service, SubCategory
+
+
+class SubCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubCategory
+        fields = ("id", "name")
 
 
 class CategorySerializer(serializers.ModelSerializer):
     icon = serializers.SerializerMethodField()
+    subcategories = SubCategorySerializer(many=True, read_only=True)
 
     class Meta:
         model = Category
-        fields = ("id", "name", "icon")
+        fields = ("id", "name", "icon", "subcategories")
 
     def get_icon(self, obj) -> str | None:
         if obj.icon:
@@ -47,6 +54,8 @@ class SalonListSerializer(serializers.ModelSerializer):
     rating = serializers.FloatField(read_only=True)
     opening_hours = serializers.SerializerMethodField()
     employees = EmployeeSerializer(many=True, read_only=True)
+    subcategory_id = serializers.IntegerField(source="subcategory.id", default=None, read_only=True)
+    subcategory_name = serializers.CharField(source="subcategory.name", default=None, read_only=True)
 
     class Meta:
         model = Salon
@@ -54,6 +63,8 @@ class SalonListSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "type",
+            "subcategory_id",
+            "subcategory_name",
             "location_name",
             "phone_number",
             "mail",

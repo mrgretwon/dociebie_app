@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import logoCyanImage from "@/assets/images/logo-dociebie.png";
 import Button from "@/components/Button";
@@ -45,8 +53,15 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.contentWrapper}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={styles.container}
+    >
+      <ScrollView
+        contentContainerStyle={styles.contentWrapper}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Image source={logoCyanImage} style={styles.logo} contentFit="contain" />
 
         <TextInputComponent
@@ -100,8 +115,8 @@ export default function LoginScreen() {
           secondText={translate("REGISTER")}
           onClick={() => router.navigate("/(register)")}
         />
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -116,7 +131,8 @@ const styles = StyleSheet.create({
     backgroundColor: baseGrey,
   },
   contentWrapper: {
-    display: "flex",
+    flexGrow: 1,
+    justifyContent: "center",
     width: "100%",
   },
   headerText: {

@@ -1,6 +1,8 @@
 import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useEffect, useState } from "react";
 import {
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -132,7 +134,11 @@ export default function GroupDetailScreen() {
   return (
     <View style={styles.root}>
       <Header />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}
+      >
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
           {!showAddForm ? (
             <>
@@ -243,6 +249,7 @@ export default function GroupDetailScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }

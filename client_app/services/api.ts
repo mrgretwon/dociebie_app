@@ -182,20 +182,34 @@ export async function updateUserProfileData(
 // Categories
 // ---------------------------------------------------------------------------
 
+export type SubCategoryItem = {
+  id: number;
+  name: string;
+};
+
 export type CategoryItem = {
   id: number;
   name: string;
   icon: string | null;
+  subcategories: SubCategoryItem[];
+};
+
+type CategoryResponseItem = {
+  id: number;
+  name: string;
+  icon: string | null;
+  subcategories?: SubCategoryItem[];
 };
 
 export async function fetchCategories(): Promise<CategoryItem[]> {
-  const data = await request<CategoryItem[] | { results: CategoryItem[] }>(
+  const data = await request<CategoryResponseItem[] | { results: CategoryResponseItem[] }>(
     `${API_URL}/categories/`
   );
   const list = unwrapList(data);
   return list.map((c) => ({
     ...c,
     icon: c.icon ? `${BASE_URL}${c.icon}` : null,
+    subcategories: c.subcategories ?? [],
   }));
 }
 
@@ -216,6 +230,7 @@ export async function fetchAllSalons(params: SalonsSearchRequestParams): Promise
     queryParts.push(`lng=${params.longitude}`);
     queryParts.push(`distance=${params.distance}`);
   }
+  if (params.subcategoryId != null) queryParts.push(`subcategory_id=${params.subcategoryId}`);
 
   const queryString = queryParts.length > 0 ? `?${queryParts.join("&")}` : "";
 

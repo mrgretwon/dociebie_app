@@ -1,4 +1,4 @@
-import { blackFont, greyedOutFont, greyFont } from "@/constants/style-vars";
+import { blackFont, greyedOutFont, lightGrey } from "@/constants/style-vars";
 import React from "react";
 import { StyleSheet, TextInput } from "react-native";
 
@@ -32,11 +32,11 @@ const styles = StyleSheet.create({
   inputBox: {
     width: "100%",
     backgroundColor: "white",
-    borderColor: greyFont,
+    borderColor: lightGrey,
     borderWidth: 1,
     borderRadius: 8,
     color: blackFont,
-    paddingVertical: 12,
+    height: 48,
     paddingHorizontal: 16,
   },
 });

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import Button from "@/components/Button";
 import {
@@ -37,7 +37,11 @@ const PaymentsScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}
+      >
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.card}>
           <Text style={styles.title}>{translate("PAYMENT_ADD_PAYMENT")}</Text>
           <Text style={styles.subtitle}>{translate("PAYMENT_ADD_CARD_SUBTITLE")}</Text>
@@ -110,6 +114,7 @@ const PaymentsScreen = () => {
           </View>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

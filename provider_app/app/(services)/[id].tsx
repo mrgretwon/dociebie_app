@@ -1,6 +1,6 @@
 import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 import Header from "@/components/Header";
@@ -124,7 +124,11 @@ export default function EditServiceScreen() {
   return (
     <View style={styles.root}>
       <Header />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}
+      >
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
           <Text style={styles.title}>
             {isNew ? "Stwórz nową usługę" : "Edytuj usługę"}
@@ -210,6 +214,7 @@ export default function EditServiceScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }

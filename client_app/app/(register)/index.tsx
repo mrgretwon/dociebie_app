@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import logoCyanImage from "@/assets/images/logo-dociebie.png";
 import Button from "@/components/Button";
@@ -58,8 +65,12 @@ export default function RegisterScreen() {
   };
 
   return (
-    <SafeAreaView edges={["top", "bottom"]} style={styles.container}>
-      <ScrollView contentContainerStyle={styles.contentWrapper}>
+    <SafeAreaView edges={["top"]} style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}
+      >
+      <ScrollView contentContainerStyle={styles.contentWrapper} keyboardShouldPersistTaps="handled">
         <Image source={logoCyanImage} style={styles.logo} />
         <Text style={styles.headerText}>{translate("REGISTER")}</Text>
         <Text style={styles.registerInfoText}>{translate("REGISTRATION_INFO")}</Text>
@@ -154,6 +165,7 @@ export default function RegisterScreen() {
           onClick={() => router.navigate("/(login)")}
         />
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

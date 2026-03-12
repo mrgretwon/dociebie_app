@@ -2,6 +2,8 @@ import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useEffect, useState } from "react";
 import {
   Image,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -133,7 +135,11 @@ export default function EditEmployeeScreen() {
   return (
     <View style={styles.root}>
       <Header />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}
+      >
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
           <Text style={styles.title}>
             {isNew ? "Dodaj pracownika" : "Edytuj pracownika"}
@@ -201,6 +207,7 @@ export default function EditEmployeeScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }

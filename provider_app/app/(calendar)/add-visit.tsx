@@ -1,6 +1,8 @@
 import { useSafeBack } from "@/hooks/use-safe-back";
 import React, { useEffect, useState } from "react";
 import {
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -173,7 +175,11 @@ export default function AddVisitScreen() {
     return (
       <View style={styles.root}>
         <Header />
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={{ flex: 1 }}
+        >
+        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <View style={styles.content}>
             <Text style={styles.title}>Dodaj wizytę</Text>
             <Text style={styles.subtitle}>
@@ -351,6 +357,7 @@ export default function AddVisitScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
+        </KeyboardAvoidingView>
       </View>
     );
   }
@@ -358,7 +365,7 @@ export default function AddVisitScreen() {
   return (
     <View style={styles.root}>
       <Header />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
           <Text style={styles.title}>Dodaj wizytę</Text>
           <Text style={styles.subtitle}>Wybierz termin wizyty.</Text>

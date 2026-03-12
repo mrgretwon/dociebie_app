@@ -13,6 +13,7 @@ import Header from "@/components/Header";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CategoriesProvider } from "@/contexts/CategoriesContext";
 import { SalonsSearchProvider } from "@/contexts/SalonsSearchContext";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -26,7 +27,7 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
       <ToastManager position="bottom" />
       <CategoriesProvider>
       <AuthProvider>
@@ -60,6 +61,6 @@ export default function RootLayout() {
         </SalonsSearchProvider>
       </AuthProvider>
       </CategoriesProvider>
-    </>
+    </SafeAreaView>
   );
 }
